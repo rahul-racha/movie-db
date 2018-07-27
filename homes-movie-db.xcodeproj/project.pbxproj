@@ -99,6 +99,7 @@
 		824FEE56210ADD1700C23121 /* homes-movie-db */ = {
 			isa = PBXGroup;
 			children = (
+				824FEE88210B9F1D00C23121 /* Models */,
 				824FEE57210ADD1700C23121 /* AppDelegate.swift */,
 				824FEE59210ADD1700C23121 /* ViewController.swift */,
 				824FEE5B210ADD1700C23121 /* Main.storyboard */,
@@ -126,6 +127,13 @@
 				824FEE7C210ADD1800C23121 /* Info.plist */,
 			);
 			path = "homes-movie-dbUITests";
+			sourceTree = "<group>";
+		};
+		824FEE88210B9F1D00C23121 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Models;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
