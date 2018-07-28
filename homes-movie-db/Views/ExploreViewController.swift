@@ -8,6 +8,7 @@
 
 import UIKit
 import SearchTextField
+import TMDBSwift
 
 class ExploreViewController: UIViewController {
 
@@ -15,7 +16,7 @@ class ExploreViewController: UIViewController {
     @IBOutlet weak var exploredMoviesView: UITableView!
     @IBOutlet weak var searchImgView: UIImageViewX!
     var movdb: MovieDbService?
-    
+    var filteredMovies: [MovieMDB]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,10 +48,11 @@ class ExploreViewController: UIViewController {
             if let criteria = self.searchTextField.text {
                 if criteria.count > 1 {
                     self.searchTextField.showLoadingIndicator()
-                    let results = self.searchItemsFromMovieDb(withTitle: criteria)
-                    if (results.count > 0) {
-                        self.searchTextField.filterItems(results)
-                    }
+                    self.searchItemsFromMovieDb(withTitle: criteria, { (results) -> (Void) in
+                        if (results.count > 0) {
+                            self.searchTextField.filterItems(results)
+                        }
+                    })
                     self.searchTextField.stopLoadingIndicator()
                 }
             }
@@ -60,7 +62,7 @@ class ExploreViewController: UIViewController {
             let item = filteredResults[itemPosition]
             print("Item at position \(itemPosition): \(item.title)")
             
-            // Do whatever you want with the picked item
+            
             self.searchTextField.text = item.title
         }
         
@@ -76,17 +78,36 @@ class ExploreViewController: UIViewController {
         }
     }
     
-    func searchItemsFromMovieDb(withTitle title: String) -> [SearchTextFieldItem] {
-        var items = [SearchTextFieldItem]()
-        guard let results = movdb?.getMovies(withTitle: title) else {
-            return items
+    func setPosterImage(fromPath path: String) -> UIImage? {
+        var poster: UIImage?
+        //let imgWorker = DispatchQueue(label: "image-worker", qos: .utility)
+        //imgWorker.async {
+        let url = URL(string:path)
+        if let data = try? Data(contentsOf: url!)
+        {
+            let image: UIImage = UIImage(data: data)!
+            poster = image
         }
-//        let item1 = SearchTextFieldItem(title: "Blue", subtitle: "Color", image: UIImage(named: "icon_blue"))
-//        let item2 = SearchTextFieldItem(title: "Red", subtitle: "Color", image: UIImage(named: "icon_red"))
-//        let item3 = SearchTextFieldItem(title: "Yellow", subtitle: "Color", image: UIImage(named: "icon_yellow"))
-//        items = [item1]
-        
-        return items
+        //}
+        return poster
+    }
+    
+    func searchItemsFromMovieDb(withTitle title: String, _ completion: @escaping ([SearchTextFieldItem]) -> ()) {
+        var items = [SearchTextFieldItem]()
+        movdb?.getMovies(withTitle: title, {
+            (results) -> Void in
+            if (results == nil) {
+                return
+            }
+            self.filteredMovies = results
+            for movie in results! {
+                let posterPath = MovieDbService.basePosterPath + MovieDbService.PosterSize.w185.rawValue + "/" +  movie.poster_path!
+                let posterImg = self.setPosterImage(fromPath: posterPath)
+                let item = SearchTextFieldItem(title: movie.original_title!, subtitle: "", image: posterImg)
+                items.append(item)
+            }
+            completion(items)
+        })
     }
 
     /*
