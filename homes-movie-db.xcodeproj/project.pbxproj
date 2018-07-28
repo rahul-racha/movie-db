@@ -28,6 +28,8 @@
 		824FEE9C210BC78F00C23121 /* UIVisualEffectViewX.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEE92210BC78F00C23121 /* UIVisualEffectViewX.swift */; };
 		824FEE9D210BC78F00C23121 /* UISliderX.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEE93210BC78F00C23121 /* UISliderX.swift */; };
 		824FEEA0210BCFC700C23121 /* ExploreViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEE9F210BCFC700C23121 /* ExploreViewController.swift */; };
+		824FEEA3210CFDD900C23121 /* MovieDbService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEEA2210CFDD900C23121 /* MovieDbService.swift */; };
+		824FEEA5210D10D900C23121 /* Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEEA4210D10D900C23121 /* Support.swift */; };
 		CE7C341FA1919208DF7BFF42 /* Pods_homes_movie_dbUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5B92C9403D59B75B73ABAC7 /* Pods_homes_movie_dbUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -77,6 +79,8 @@
 		824FEE92210BC78F00C23121 /* UIVisualEffectViewX.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIVisualEffectViewX.swift; sourceTree = "<group>"; };
 		824FEE93210BC78F00C23121 /* UISliderX.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UISliderX.swift; sourceTree = "<group>"; };
 		824FEE9F210BCFC700C23121 /* ExploreViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreViewController.swift; sourceTree = "<group>"; };
+		824FEEA2210CFDD900C23121 /* MovieDbService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDbService.swift; sourceTree = "<group>"; };
+		824FEEA4210D10D900C23121 /* Support.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Support.swift; sourceTree = "<group>"; };
 		9D84D21C6C9B9BFA7CC33258 /* Pods_homes_movie_db.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_homes_movie_db.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB7601A7F5A3AA297A89DE07 /* Pods-homes-movie-dbUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-homes-movie-dbUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-homes-movie-dbUITests/Pods-homes-movie-dbUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		C58D15D0C103D681F167C410 /* Pods-homes-movie-dbUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-homes-movie-dbUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-homes-movie-dbUITests/Pods-homes-movie-dbUITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -139,9 +143,11 @@
 		824FEE56210ADD1700C23121 /* homes-movie-db */ = {
 			isa = PBXGroup;
 			children = (
+				824FEEA1210CFD9400C23121 /* Services */,
 				824FEE9E210BCF9C00C23121 /* Views */,
 				824FEE88210B9F1D00C23121 /* Models */,
 				824FEE57210ADD1700C23121 /* AppDelegate.swift */,
+				824FEEA4210D10D900C23121 /* Support.swift */,
 				824FEE61210ADD1800C23121 /* Assets.xcassets */,
 				824FEE63210ADD1800C23121 /* LaunchScreen.storyboard */,
 				824FEE66210ADD1800C23121 /* Info.plist */,
@@ -200,6 +206,14 @@
 				824FEE9F210BCFC700C23121 /* ExploreViewController.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		824FEEA1210CFD9400C23121 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				824FEEA2210CFDD900C23121 /* MovieDbService.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 		852CE456B3F8BF67FB0D4211 /* Frameworks */ = {
@@ -442,9 +456,11 @@
 				824FEE9C210BC78F00C23121 /* UIVisualEffectViewX.swift in Sources */,
 				824FEE9B210BC78F00C23121 /* UIViewX.swift in Sources */,
 				824FEE98210BC78F00C23121 /* UIViewAnchorPoint.swift in Sources */,
+				824FEEA5210D10D900C23121 /* Support.swift in Sources */,
 				824FEE60210ADD1700C23121 /* homes_movie_db.xcdatamodeld in Sources */,
 				824FEE5A210ADD1700C23121 /* ViewController.swift in Sources */,
 				824FEE9D210BC78F00C23121 /* UISliderX.swift in Sources */,
+				824FEEA3210CFDD900C23121 /* MovieDbService.swift in Sources */,
 				824FEE96210BC78F00C23121 /* UIButtonX.swift in Sources */,
 				824FEE97210BC78F00C23121 /* UILabelX.swift in Sources */,
 				824FEE94210BC78F00C23121 /* UIViewXRadialGradient.swift in Sources */,
