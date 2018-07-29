@@ -10,6 +10,10 @@ import UIKit
 import SearchTextField
 import TMDBSwift
 
+protocol MovieDetailsDelegate {
+    func setMovieDetails(from movList: [String:String])
+}
+
 class ExploreViewController: UIViewController {
 
     @IBOutlet weak var searchTextField: SearchTextField!
@@ -17,6 +21,7 @@ class ExploreViewController: UIViewController {
     @IBOutlet weak var searchImgView: UIImageViewX!
     var movdb: MovieDbService?
     var filteredMovies: [MovieMDB]?
+    var delegate: MovieDetailsDelegate?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -62,10 +67,29 @@ class ExploreViewController: UIViewController {
             let item = filteredResults[itemPosition]
             print("Item at position \(itemPosition): \(item.title)")
             
-            
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
             self.searchTextField.text = item.title
+            var detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
+            detailVC.movieDetails = self.setDetailVCContent(index: itemPosition)
+            detailVC.posterImg = item.image
+            detailVC.modalPresentationStyle = .overCurrentContext
+            self.present(detailVC, animated: true, completion: nil)
         }
-        
+    }
+    
+    func setDetailVCContent(index: Int) -> [String:String] {
+        var movieDict = [String:String]()
+        movieDict["poster_path"] = filteredMovies![index].poster_path
+        movieDict["backdrop_path"] = filteredMovies![index].backdrop_path
+        movieDict["original_title"] = filteredMovies![index].original_title
+        movieDict["overview"] = filteredMovies![0].overview
+        movieDict["release_date"] = filteredMovies![0].release_date
+        if (filteredMovies![0].popularity != nil) {
+        movieDict["popularity"] = String(format: "%.3f", filteredMovies![0].popularity!)
+        } else {
+            movieDict["popularity"] = "unknown"
+        }
+        return movieDict
     }
     
     @objc func searchTapped(gesture: UIGestureRecognizer) {

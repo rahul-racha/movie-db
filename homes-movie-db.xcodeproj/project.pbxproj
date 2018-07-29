@@ -10,7 +10,7 @@
 		2F40FA99493896807AE0F90B /* Pods_homes_movie_db.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 9D84D21C6C9B9BFA7CC33258 /* Pods_homes_movie_db.framework */; };
 		6CCE90FA3CC19FC8D420B5DB /* Pods_homes_movie_dbTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 09EEF6E4C24B508F9137307C /* Pods_homes_movie_dbTests.framework */; };
 		824FEE58210ADD1700C23121 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEE57210ADD1700C23121 /* AppDelegate.swift */; };
-		824FEE5A210ADD1700C23121 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEE59210ADD1700C23121 /* ViewController.swift */; };
+		824FEE5A210ADD1700C23121 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEE59210ADD1700C23121 /* DetailViewController.swift */; };
 		824FEE5D210ADD1700C23121 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 824FEE5B210ADD1700C23121 /* Main.storyboard */; };
 		824FEE60210ADD1700C23121 /* homes_movie_db.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 824FEE5E210ADD1700C23121 /* homes_movie_db.xcdatamodeld */; };
 		824FEE62210ADD1800C23121 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 824FEE61210ADD1800C23121 /* Assets.xcassets */; };
@@ -56,7 +56,7 @@
 		69673948134A1AAD79251261 /* Pods-homes-movie-dbTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-homes-movie-dbTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-homes-movie-dbTests/Pods-homes-movie-dbTests.release.xcconfig"; sourceTree = "<group>"; };
 		824FEE54210ADD1700C23121 /* homes-movie-db.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "homes-movie-db.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		824FEE57210ADD1700C23121 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		824FEE59210ADD1700C23121 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		824FEE59210ADD1700C23121 /* DetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		824FEE5C210ADD1700C23121 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		824FEE5F210ADD1700C23121 /* homes_movie_db.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = homes_movie_db.xcdatamodel; sourceTree = "<group>"; };
 		824FEE61210ADD1800C23121 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -202,7 +202,7 @@
 			isa = PBXGroup;
 			children = (
 				824FEE5B210ADD1700C23121 /* Main.storyboard */,
-				824FEE59210ADD1700C23121 /* ViewController.swift */,
+				824FEE59210ADD1700C23121 /* DetailViewController.swift */,
 				824FEE9F210BCFC700C23121 /* ExploreViewController.swift */,
 			);
 			path = Views;
@@ -458,7 +458,7 @@
 				824FEE98210BC78F00C23121 /* UIViewAnchorPoint.swift in Sources */,
 				824FEEA5210D10D900C23121 /* Support.swift in Sources */,
 				824FEE60210ADD1700C23121 /* homes_movie_db.xcdatamodeld in Sources */,
-				824FEE5A210ADD1700C23121 /* ViewController.swift in Sources */,
+				824FEE5A210ADD1700C23121 /* DetailViewController.swift in Sources */,
 				824FEE9D210BC78F00C23121 /* UISliderX.swift in Sources */,
 				824FEEA3210CFDD900C23121 /* MovieDbService.swift in Sources */,
 				824FEE96210BC78F00C23121 /* UIButtonX.swift in Sources */,
