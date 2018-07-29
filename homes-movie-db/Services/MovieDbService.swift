@@ -33,9 +33,25 @@ class MovieDbService {
             print(movies?[0].poster_path)
             print(movies?[0].video)
             print(movies?.count)
+            print(movies?[0].genres)
             let notificationObj = ["movies": movies]
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.searchKey), object: nil, userInfo: notificationObj)
         }
         completion(nil)
+    }
+    
+    func getPosterImage(fromPath path: String?, size: PosterSize) -> UIImage? {
+        guard let pathUrl = path else {
+            return nil
+        }
+        let posterPath = MovieDbService.basePosterPath + size.rawValue + "/" +  pathUrl
+        var poster: UIImage?
+        let url = URL(string:posterPath)
+        if let data = try? Data(contentsOf: url!)
+        {
+            let image: UIImage = UIImage(data: data)!
+            poster = image
+        }
+        return poster
     }
 }

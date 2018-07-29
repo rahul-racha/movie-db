@@ -30,6 +30,8 @@
 		824FEEA0210BCFC700C23121 /* ExploreViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEE9F210BCFC700C23121 /* ExploreViewController.swift */; };
 		824FEEA3210CFDD900C23121 /* MovieDbService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEEA2210CFDD900C23121 /* MovieDbService.swift */; };
 		824FEEA5210D10D900C23121 /* Support.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEEA4210D10D900C23121 /* Support.swift */; };
+		824FEEA7210DB56000C23121 /* Movie.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEEA6210DB56000C23121 /* Movie.swift */; };
+		824FEEAA210DBA0B00C23121 /* MovieViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824FEEA9210DBA0B00C23121 /* MovieViewModel.swift */; };
 		CE7C341FA1919208DF7BFF42 /* Pods_homes_movie_dbUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = D5B92C9403D59B75B73ABAC7 /* Pods_homes_movie_dbUITests.framework */; };
 /* End PBXBuildFile section */
 
@@ -81,6 +83,8 @@
 		824FEE9F210BCFC700C23121 /* ExploreViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreViewController.swift; sourceTree = "<group>"; };
 		824FEEA2210CFDD900C23121 /* MovieDbService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieDbService.swift; sourceTree = "<group>"; };
 		824FEEA4210D10D900C23121 /* Support.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Support.swift; sourceTree = "<group>"; };
+		824FEEA6210DB56000C23121 /* Movie.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Movie.swift; sourceTree = "<group>"; };
+		824FEEA9210DBA0B00C23121 /* MovieViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MovieViewModel.swift; sourceTree = "<group>"; };
 		9D84D21C6C9B9BFA7CC33258 /* Pods_homes_movie_db.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_homes_movie_db.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		AB7601A7F5A3AA297A89DE07 /* Pods-homes-movie-dbUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-homes-movie-dbUITests.debug.xcconfig"; path = "Pods/Target Support Files/Pods-homes-movie-dbUITests/Pods-homes-movie-dbUITests.debug.xcconfig"; sourceTree = "<group>"; };
 		C58D15D0C103D681F167C410 /* Pods-homes-movie-dbUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-homes-movie-dbUITests.release.xcconfig"; path = "Pods/Target Support Files/Pods-homes-movie-dbUITests/Pods-homes-movie-dbUITests.release.xcconfig"; sourceTree = "<group>"; };
@@ -143,6 +147,7 @@
 		824FEE56210ADD1700C23121 /* homes-movie-db */ = {
 			isa = PBXGroup;
 			children = (
+				824FEEA8210DB9F300C23121 /* View Model */,
 				824FEEA1210CFD9400C23121 /* Services */,
 				824FEE9E210BCF9C00C23121 /* Views */,
 				824FEE88210B9F1D00C23121 /* Models */,
@@ -177,6 +182,7 @@
 		824FEE88210B9F1D00C23121 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				824FEEA6210DB56000C23121 /* Movie.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -214,6 +220,14 @@
 				824FEEA2210CFDD900C23121 /* MovieDbService.swift */,
 			);
 			path = Services;
+			sourceTree = "<group>";
+		};
+		824FEEA8210DB9F300C23121 /* View Model */ = {
+			isa = PBXGroup;
+			children = (
+				824FEEA9210DBA0B00C23121 /* MovieViewModel.swift */,
+			);
+			path = "View Model";
 			sourceTree = "<group>";
 		};
 		852CE456B3F8BF67FB0D4211 /* Frameworks */ = {
@@ -395,11 +409,15 @@
 			);
 			inputPaths = (
 				"${SRCROOT}/Pods/Target Support Files/Pods-homes-movie-db/Pods-homes-movie-db-frameworks.sh",
+				"${BUILT_PRODUCTS_DIR}/Realm/Realm.framework",
+				"${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework",
 				"${BUILT_PRODUCTS_DIR}/SearchTextField/SearchTextField.framework",
 				"${BUILT_PRODUCTS_DIR}/TMDBSwift/TMDBSwift.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Realm.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/RealmSwift.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/SearchTextField.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/TMDBSwift.framework",
 			);
@@ -456,6 +474,7 @@
 				824FEE9C210BC78F00C23121 /* UIVisualEffectViewX.swift in Sources */,
 				824FEE9B210BC78F00C23121 /* UIViewX.swift in Sources */,
 				824FEE98210BC78F00C23121 /* UIViewAnchorPoint.swift in Sources */,
+				824FEEAA210DBA0B00C23121 /* MovieViewModel.swift in Sources */,
 				824FEEA5210D10D900C23121 /* Support.swift in Sources */,
 				824FEE60210ADD1700C23121 /* homes_movie_db.xcdatamodeld in Sources */,
 				824FEE5A210ADD1700C23121 /* DetailViewController.swift in Sources */,
@@ -467,6 +486,7 @@
 				824FEE95210BC78F00C23121 /* UITextFieldX.swift in Sources */,
 				824FEEA0210BCFC700C23121 /* ExploreViewController.swift in Sources */,
 				824FEE58210ADD1700C23121 /* AppDelegate.swift in Sources */,
+				824FEEA7210DB56000C23121 /* Movie.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

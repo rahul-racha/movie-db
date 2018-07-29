@@ -17,4 +17,5 @@ struct AlertManager {
         alert.addAction(UIAlertAction(title: action, style: .default, handler: nil))
         target.present(alert, animated: true)
     }
+    
 }

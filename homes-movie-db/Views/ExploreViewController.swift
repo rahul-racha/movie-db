@@ -22,6 +22,7 @@ class ExploreViewController: UIViewController {
     var movdb: MovieDbService?
     var filteredMovies: [MovieMDB]?
     var delegate: MovieDetailsDelegate?
+    var activityIndicator: UIActivityIndicatorView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -55,27 +56,46 @@ class ExploreViewController: UIViewController {
                 if criteria.count > 1 {
                    self.searchTextField.showLoadingIndicator()
                     
-                   self.searchItemsFromMovieDb(withTitle: criteria, { (results) -> (Void) in
-                            print("search items is requested")
+                    self.movdb?.getMovies(withTitle: criteria, {
+                        (results) -> Void in
+                        print("get movies call returned")
                     })
+                    
+//                   self.searchItemsFromMovieDb(withTitle: criteria, { (results) -> (Void) in
+//                            print("search items is requested")
+//                    })
                 }
             }
         }
         
         searchTextField.itemSelectionHandler = { filteredResults, itemPosition in
+            self.setActivityIndicator()
             let item = filteredResults[itemPosition]
             print("Item at position \(itemPosition): \(item.title)")
             
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            if (item.title.range(of:")") != nil) {
+                let endIndex = item.title.index(item.title.endIndex, offsetBy: -13)
+                self.searchTextField.text = String(item.title[...endIndex])
+            } else {
             self.searchTextField.text = item.title
+            }
             let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
-            detailVC.movieDetails = self.setDetailVCContent(index: itemPosition)
+            detailVC.movieDetails = self.filteredMovies![itemPosition]
+                //self.setDetailVCContent(index: itemPosition)
             detailVC.posterImg = item.image
             detailVC.modalPresentationStyle = .overCurrentContext
+            self.activityIndicator?.removeFromSuperview()
             self.present(detailVC, animated: true, completion: nil)
         }
     }
     
+    func setActivityIndicator() {
+        activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
+        view.addSubview(activityIndicator!)
+        activityIndicator?.frame = view.bounds
+        activityIndicator?.startAnimating()
+    }
     
     func setDetailVCContent(index: Int) -> [String:String] {
         var movieDict = [String:String]()
@@ -130,8 +150,11 @@ class ExploreViewController: UIViewController {
             if (movie.poster_path == nil) {
                 posterImg = UIImage(named: "cinema-64154.jpg")
             } else {
-                let posterPath = MovieDbService.basePosterPath + MovieDbService.PosterSize.w92.rawValue + "/" +  movie.poster_path!
-                posterImg = self.setPosterImage(fromPath: posterPath)
+                
+                let service = MovieDbService()
+                posterImg = service.getPosterImage(fromPath: movie.poster_path, size: MovieDbService.PosterSize.w92)
+//                let posterPath = MovieDbService.basePosterPath + MovieDbService.PosterSize.w92.rawValue + "/" +  movie.poster_path!
+//                posterImg = self.setPosterImage(fromPath: posterPath)
             }
             var title = ""
             if (movie.original_title != nil) {
@@ -155,13 +178,13 @@ class ExploreViewController: UIViewController {
         }
     }
     
-    func searchItemsFromMovieDb(withTitle title: String, _ completion: @escaping ([SearchTextFieldItem]?) -> ()) {
-        self.movdb?.getMovies(withTitle: title, {
-            (results) -> Void in
-            print("get movies call returned")
-        })
-        completion(nil)
-    }
+//    func searchItemsFromMovieDb(withTitle title: String, _ completion: @escaping ([SearchTextFieldItem]?) -> ()) {
+//        self.movdb?.getMovies(withTitle: title, {
+//            (results) -> Void in
+//            print("get movies call returned")
+//        })
+//        completion(nil)
+//    }
 
     /*
     // MARK: - Navigation
