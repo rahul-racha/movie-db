@@ -12,8 +12,10 @@ import TMDBSwift
 class MovieDbService {
     private static let apiKey: String = "f0a72670d4db6d7186c51e06dcb33abc"
     static let basePosterPath: String = "https://image.tmdb.org/t/p/"
+    let searchKey = "com.homes.search"
     
     enum PosterSize: String {
+        case w92 = "w92"
         case w185 = "w185"
         case w500 = "w500"
         case original = "original"
@@ -24,7 +26,6 @@ class MovieDbService {
     }
     
     func getMovies(withTitle title: String, _ completion: @escaping ([MovieMDB]?) -> ()) {
-        //var movieList: [MovieMDB]?
         SearchMDB.movie(query: title, language: "en", page: 1, includeAdult: true, year: nil, primaryReleaseYear: nil) {
             data, movies in
             print(movies?[0].original_title)
@@ -32,7 +33,9 @@ class MovieDbService {
             print(movies?[0].poster_path)
             print(movies?[0].video)
             print(movies?.count)
-            completion(movies)
+            let notificationObj = ["movies": movies]
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.searchKey), object: nil, userInfo: notificationObj)
         }
+        completion(nil)
     }
 }

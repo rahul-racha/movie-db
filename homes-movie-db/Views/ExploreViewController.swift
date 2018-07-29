@@ -31,7 +31,8 @@ class ExploreViewController: UIViewController {
         movdb = MovieDbService()
         customizeSearchTextField()
         addGestures()
-        // Do any additional setup after loading the view.
+        NotificationCenter.default.addObserver(self, selector: #selector(self.receiveMoviesInfo(_:)), name: .searchKey, object: nil)
+        
     }
     
     func addGestures() {
@@ -52,13 +53,11 @@ class ExploreViewController: UIViewController {
         searchTextField.userStoppedTypingHandler = {
             if let criteria = self.searchTextField.text {
                 if criteria.count > 1 {
-                    self.searchTextField.showLoadingIndicator()
-                    self.searchItemsFromMovieDb(withTitle: criteria, { (results) -> (Void) in
-                        if (results.count > 0) {
-                            self.searchTextField.filterItems(results)
-                        }
+                   self.searchTextField.showLoadingIndicator()
+                    
+                   self.searchItemsFromMovieDb(withTitle: criteria, { (results) -> (Void) in
+                            print("search items is requested")
                     })
-                    self.searchTextField.stopLoadingIndicator()
                 }
             }
         }
@@ -69,13 +68,14 @@ class ExploreViewController: UIViewController {
             
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             self.searchTextField.text = item.title
-            var detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
+            let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
             detailVC.movieDetails = self.setDetailVCContent(index: itemPosition)
             detailVC.posterImg = item.image
             detailVC.modalPresentationStyle = .overCurrentContext
             self.present(detailVC, animated: true, completion: nil)
         }
     }
+    
     
     func setDetailVCContent(index: Int) -> [String:String] {
         var movieDict = [String:String]()
@@ -104,34 +104,63 @@ class ExploreViewController: UIViewController {
     
     func setPosterImage(fromPath path: String) -> UIImage? {
         var poster: UIImage?
-        //let imgWorker = DispatchQueue(label: "image-worker", qos: .utility)
-        //imgWorker.async {
         let url = URL(string:path)
         if let data = try? Data(contentsOf: url!)
         {
             let image: UIImage = UIImage(data: data)!
             poster = image
         }
-        //}
         return poster
     }
     
-    func searchItemsFromMovieDb(withTitle title: String, _ completion: @escaping ([SearchTextFieldItem]) -> ()) {
+    @objc func receiveMoviesInfo(_ notification: NSNotification) {
+        let movieDict = notification.userInfo!["movies"] as? [MovieMDB]?
+        if (movieDict == nil) {
+            return
+        }
+        self.filteredMovies = movieDict!
+        guard let results = movieDict! else {
+            return
+        }
         var items = [SearchTextFieldItem]()
-        movdb?.getMovies(withTitle: title, {
+        DispatchQueue.global(qos: .userInteractive).async {
+            var counter: Int = 1
+        for movie in results {
+            var posterImg: UIImage?
+            if (movie.poster_path == nil) {
+                posterImg = UIImage(named: "cinema-64154.jpg")
+            } else {
+                let posterPath = MovieDbService.basePosterPath + MovieDbService.PosterSize.w92.rawValue + "/" +  movie.poster_path!
+                posterImg = self.setPosterImage(fromPath: posterPath)
+            }
+            var title = ""
+            if (movie.original_title != nil) {
+                if (movie.release_date != nil) {
+                    title = movie.original_title! + " (" + movie.release_date! + ")"
+                } else {
+                    title = movie.original_title!
+                }
+            }
+            let item = SearchTextFieldItem(title: title, subtitle: "", image: posterImg)
+            items.append(item)
+            counter += 1
+            if (counter > 5) {
+                break
+            }
+        }
+            DispatchQueue.main.async {
+                self.searchTextField.filterItems(items)
+                self.searchTextField.stopLoadingIndicator()
+            }
+        }
+    }
+    
+    func searchItemsFromMovieDb(withTitle title: String, _ completion: @escaping ([SearchTextFieldItem]?) -> ()) {
+        self.movdb?.getMovies(withTitle: title, {
             (results) -> Void in
-            if (results == nil) {
-                return
-            }
-            self.filteredMovies = results
-            for movie in results! {
-                let posterPath = MovieDbService.basePosterPath + MovieDbService.PosterSize.w185.rawValue + "/" +  movie.poster_path!
-                let posterImg = self.setPosterImage(fromPath: posterPath)
-                let item = SearchTextFieldItem(title: movie.original_title!, subtitle: "", image: posterImg)
-                items.append(item)
-            }
-            completion(items)
+            print("get movies call returned")
         })
+        completion(nil)
     }
 
     /*
@@ -159,4 +188,8 @@ extension ExploreViewController: UITableViewDataSource {
 
 extension ExploreViewController: UITableViewDelegate {
     
+}
+
+extension Notification.Name {
+    static let searchKey = Notification.Name("com.homes.search")
 }
