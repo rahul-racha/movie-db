@@ -19,16 +19,20 @@ class ExploreViewController: UIViewController {
     @IBOutlet weak var searchTextField: SearchTextField!
     @IBOutlet weak var exploredMoviesView: UITableView!
     @IBOutlet weak var searchImgView: UIImageViewX!
+    @IBOutlet weak var descLabel: UILabelX!
+    
     var movdb: MovieDbService?
     var filteredMovies: [MovieMDB]?
     var delegate: MovieDetailsDelegate?
     var activityIndicator: UIActivityIndicatorView?
+    var isSearchTapped: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
         exploredMoviesView.delegate = self
         exploredMoviesView.dataSource = self
         exploredMoviesView.isHidden = true
+        exploredMoviesView.tableFooterView = UIView()
         movdb = MovieDbService()
         customizeSearchTextField()
         addGestures()
@@ -47,11 +51,12 @@ class ExploreViewController: UIViewController {
         searchTextField.theme.font = UIFont.systemFont(ofSize: 12)
         //searchTextField.theme.borderColor = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1)
         searchTextField.theme.separatorColor = UIColor (red: 0.9, green: 0.9, blue: 0.9, alpha: 0.5)
-        searchTextField.theme.bgColor = UIColor (red: 0, green: 0, blue: 0, alpha: 0.7)
+        searchTextField.theme.bgColor = UIColor (red: 0, green: 0, blue: 0, alpha: 1)
         searchTextField.comparisonOptions = [.caseInsensitive]
         searchTextField.maxNumberOfResults = 5
         
         searchTextField.userStoppedTypingHandler = {
+            self.isSearchTapped = false
             if let criteria = self.searchTextField.text {
                 if criteria.count > 1 {
                    self.searchTextField.showLoadingIndicator()
@@ -80,6 +85,7 @@ class ExploreViewController: UIViewController {
                     self.searchTextField.text = item.title
                     self.searchTextField.filterItems([])
                     self.searchTextField.hideResultsList()
+                    self.exploredMoviesView.isHidden = false
                     self.present(detailVC, animated: true, completion: nil)
                 }
             }
@@ -108,13 +114,27 @@ class ExploreViewController: UIViewController {
         return movieDict
     }
     
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        self.view.endEditing(true)
+        self.searchTextField.filterItems([])
+        self.searchTextField.hideResultsList()
+    }
+    
     @objc func searchTapped(gesture: UIGestureRecognizer) {
         if (searchTextField.text?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty)! {
             AlertManager.openSingleActionAlert(target: self, title: "Empty", message: "Text field should not be empty", action: "OK")
             return
         }
+        setActivityIndicator()
+        self.searchTextField.filterItems([])
+        self.searchTextField.hideResultsList()
+        self.searchTextField.stopLoadingIndicator()
+        isSearchTapped = true
         if (gesture.view as? UIImageView) != nil {
-            exploredMoviesView.isHidden = false
+            self.movdb?.getMovies(withTitle: searchTextField.text!, {
+                (results) -> Void in
+                print("get movies call returned")
+            })
         }
     }
     
@@ -136,36 +156,54 @@ class ExploreViewController: UIViewController {
         }
         self.filteredMovies = movieDict!
         guard let results = movieDict! else {
+            self.searchTextField.stopLoadingIndicator()
             return
         }
+        if (false == isSearchTapped) {
+            prepareSearchSuggestions(using: results)
+        } else {
+            prepareTableViewItems(using: results)
+        }
+    }
+    
+    func prepareTableViewItems(using results: [MovieMDB]) {
+        
+        self.exploredMoviesView.reloadData()
+        //isSearchTapped = false
+        exploredMoviesView.isHidden = false
+        descLabel.isHidden = true
+        activityIndicator?.removeFromSuperview()
+    }
+    
+    func prepareSearchSuggestions(using results: [MovieMDB]) {
         var items = [SearchTextFieldItem]()
         DispatchQueue.global(qos: .userInteractive).async {
             var counter: Int = 1
-        for movie in results {
-            var posterImg: UIImage?
-            if (movie.poster_path == nil) {
-                posterImg = UIImage(named: "cinema-64154.jpg")
-            } else {
+            for movie in results {
+                var posterImg: UIImage?
+                if (movie.poster_path == nil) {
+                    posterImg = UIImage(named: "cinema-64154.jpg")
+                } else {
+                    
+                    let service = MovieDbService()
+                    posterImg = service.getPosterImage(fromPath: movie.poster_path, size: MovieDbService.PosterSize.w92)
+                }
+                var title = ""
+                var releaseDate = ""
+                if (movie.original_title != nil) {
+                    title = movie.original_title!
+                }
                 
-                let service = MovieDbService()
-                posterImg = service.getPosterImage(fromPath: movie.poster_path, size: MovieDbService.PosterSize.w92)
+                if (movie.release_date != nil) {
+                    releaseDate = movie.release_date!
+                }
+                let item = SearchTextFieldItem(title: title, subtitle: releaseDate, image: posterImg)
+                items.append(item)
+                counter += 1
+                if (counter > 5) {
+                    break
+                }
             }
-            var title = ""
-            var releaseDate = ""
-            if (movie.original_title != nil) {
-                title = movie.original_title!
-            }
-            
-            if (movie.release_date != nil) {
-                releaseDate = movie.release_date!
-            }
-            let item = SearchTextFieldItem(title: title, subtitle: releaseDate, image: posterImg)
-            items.append(item)
-            counter += 1
-            if (counter > 5) {
-                break
-            }
-        }
             DispatchQueue.main.async {
                 self.searchTextField.filterItems(items)
                 self.searchTextField.stopLoadingIndicator()
@@ -194,18 +232,67 @@ class ExploreViewController: UIViewController {
 }
 
 extension ExploreViewController: UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, willDisplayHeaderView view: UIView, forSection section: Int) {
+        let header = view as? UITableViewHeaderFooterView
+        header?.textLabel?.font = UIFont(name: "Futura", size: 17)
+        header?.textLabel?.textColor = UIColor.black
+    }
+    
+    func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
+        return "Discover all your results!"
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 1
+        if let results = filteredMovies {
+            return results.count
+        }
+        return 0
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "exploredMovieCell", for: indexPath) as! UITableViewCell
+        let cell = tableView.dequeueReusableCell(withIdentifier: "exploredMovieCell", for: indexPath) as! ExploreMovieTableViewCell
+        if let title = self.filteredMovies![indexPath.row].original_title {
+            cell.titleLabel.text = title
+        } else {
+            cell.titleLabel.text = "Unknown"
+        }
+        
+        if let date = self.filteredMovies![indexPath.row].release_date {
+            cell.releaseLabel.text = date
+        } else {
+            cell.releaseLabel.text = "Unknown"
+        }
+        DispatchQueue.global(qos: .userInteractive).async {
+            let service = MovieDbService()
+            if let posterImg = service.getPosterImage(fromPath: self.filteredMovies![indexPath.row].poster_path, size: MovieDbService.PosterSize.w92) {
+                DispatchQueue.main.async {
+                    cell.moviePosterView.image = posterImg
+                }
+            } else {
+                DispatchQueue.main.async {
+                    cell.moviePosterView.image = UIImage(named: "cinema-64154.jpg")
+                }
+            }
+        }
         return cell
     }
 }
 
 extension ExploreViewController: UITableViewDelegate {
-    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        self.setActivityIndicator()
+        DispatchQueue.global(qos: .userInteractive).async {
+            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+            let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
+            detailVC.movieDetails = self.filteredMovies![indexPath.row]
+            DispatchQueue.main.async {
+                let _ = tableView.cellForRow(at: indexPath) as! ExploreMovieTableViewCell
+                self.activityIndicator?.removeFromSuperview()
+                self.present(detailVC, animated: true, completion: nil)
+            }
+        }
+    }
 }
 
 extension Notification.Name {
