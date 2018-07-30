@@ -60,33 +60,29 @@ class ExploreViewController: UIViewController {
                         (results) -> Void in
                         print("get movies call returned")
                     })
-                    
-//                   self.searchItemsFromMovieDb(withTitle: criteria, { (results) -> (Void) in
-//                            print("search items is requested")
-//                    })
                 }
             }
         }
         
         searchTextField.itemSelectionHandler = { filteredResults, itemPosition in
             self.setActivityIndicator()
-            let item = filteredResults[itemPosition]
-            print("Item at position \(itemPosition): \(item.title)")
-            
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            if (item.title.range(of:")") != nil) {
-                let endIndex = item.title.index(item.title.endIndex, offsetBy: -13)
-                self.searchTextField.text = String(item.title[...endIndex])
-            } else {
-            self.searchTextField.text = item.title
+            DispatchQueue.global(qos: .userInteractive).async {
+                let item = filteredResults[itemPosition]
+                print("Item at position \(itemPosition): \(item.title)")
+                
+                let storyboard = UIStoryboard(name: "Main", bundle: nil)
+                let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
+                detailVC.movieDetails = self.filteredMovies![itemPosition]
+                    //self.setDetailVCContent(index: itemPosition)
+                detailVC.modalPresentationStyle = .overCurrentContext
+                DispatchQueue.main.async {
+                    self.activityIndicator?.removeFromSuperview()
+                    self.searchTextField.text = item.title
+                    self.searchTextField.filterItems([])
+                    self.searchTextField.hideResultsList()
+                    self.present(detailVC, animated: true, completion: nil)
+                }
             }
-            let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
-            detailVC.movieDetails = self.filteredMovies![itemPosition]
-                //self.setDetailVCContent(index: itemPosition)
-            detailVC.posterImg = item.image
-            detailVC.modalPresentationStyle = .overCurrentContext
-            self.activityIndicator?.removeFromSuperview()
-            self.present(detailVC, animated: true, completion: nil)
         }
     }
     
@@ -153,18 +149,17 @@ class ExploreViewController: UIViewController {
                 
                 let service = MovieDbService()
                 posterImg = service.getPosterImage(fromPath: movie.poster_path, size: MovieDbService.PosterSize.w92)
-//                let posterPath = MovieDbService.basePosterPath + MovieDbService.PosterSize.w92.rawValue + "/" +  movie.poster_path!
-//                posterImg = self.setPosterImage(fromPath: posterPath)
             }
             var title = ""
+            var releaseDate = ""
             if (movie.original_title != nil) {
-                if (movie.release_date != nil) {
-                    title = movie.original_title! + " (" + movie.release_date! + ")"
-                } else {
-                    title = movie.original_title!
-                }
+                title = movie.original_title!
             }
-            let item = SearchTextFieldItem(title: title, subtitle: "", image: posterImg)
+            
+            if (movie.release_date != nil) {
+                releaseDate = movie.release_date!
+            }
+            let item = SearchTextFieldItem(title: title, subtitle: releaseDate, image: posterImg)
             items.append(item)
             counter += 1
             if (counter > 5) {

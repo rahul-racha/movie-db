@@ -8,26 +8,29 @@
 
 import UIKit
 import TMDBSwift
-import RealmSwift
 
 class DetailViewController: UIViewController {
     
-    @IBOutlet weak var backdropImgView: UIImageView!
     @IBOutlet weak var posterImgView: UIImageView!
     @IBOutlet weak var titleLabel: UILabel!
     @IBOutlet weak var overviewTxtView: UITextView!
     @IBOutlet weak var popularityLabel: UILabel!
     @IBOutlet weak var releaseDataLabel: UILabel!
+    @IBOutlet weak var saveBarButton: UIBarButtonItem!
+    @IBOutlet weak var delBarButton: UIBarButtonItem!
+    
     
     var movieDetails: MovieMDB?
-    var posterImg: UIImage?
     var activityIndicator: UIActivityIndicatorView?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setActivityIndicator()
-        self.edgesForExtendedLayout = []
+        self.navigationController?.navigationBar.isTranslucent = false
         initViewContent()
+        DispatchQueue.global(qos: .userInteractive).async {
+            self.setBarButtonsStatus()
+        }
         activityIndicator?.removeFromSuperview()
     }
     
@@ -41,6 +44,20 @@ class DetailViewController: UIViewController {
         view.addSubview(activityIndicator!)
         activityIndicator?.frame = view.bounds
         activityIndicator?.startAnimating()
+    }
+    
+    func setBarButtonsStatus() {
+        let mvmRef = MovieViewModel()
+        let status = mvmRef.checkMovieExistsInDb(id: (movieDetails?.id)!)
+        DispatchQueue.main.async {
+            if (true == status) {
+                self.saveBarButton.isEnabled = false
+                self.delBarButton.isEnabled = true
+            } else {
+                self.saveBarButton.isEnabled = true
+                self.delBarButton.isEnabled = false
+            }
+        }
     }
     
     func initViewContent() {
@@ -83,9 +100,32 @@ class DetailViewController: UIViewController {
     @IBAction func saveMovie(_ sender: UIBarButtonItem) {
 
         let mvmRef = MovieViewModel()
-        mvmRef.saveMovieToDb(posterPath: movieDetails?.poster_path, isAdult: (movieDetails?.adult)!, overview: movieDetails?.overview, releaseDate: movieDetails?.release_date, genreIDs: movieDetails?.genre_ids, id: (movieDetails?.id)!, originalTitle: movieDetails?.original_title, originalLang: movieDetails?.original_language, title: movieDetails?.title, backdropPath: movieDetails?.backdrop_path, popularity: movieDetails?.popularity, voteCount: movieDetails?.vote_count, isVideo: movieDetails?.video, voteAverage: movieDetails?.vote_average)
-        
+        let status = mvmRef.saveMovieToDb(posterPath: movieDetails?.poster_path, isAdult: (movieDetails?.adult)!, overview: movieDetails?.overview, releaseDate: movieDetails?.release_date, genreIDs: movieDetails?.genre_ids, id: (movieDetails?.id)!, originalTitle: movieDetails?.original_title, originalLang: movieDetails?.original_language, title: movieDetails?.title, backdropPath: movieDetails?.backdrop_path, popularity: movieDetails?.popularity, voteCount: movieDetails?.vote_count, isVideo: movieDetails?.video, voteAverage: movieDetails?.vote_average)
+        if status == true {
+            saveBarButton.isEnabled = false
+            delBarButton.isEnabled = true
+            AlertManager.openSingleActionAlert(target: self, title: "Success", message: "Movie is successfully saved", action: "OK")
+        } else {
+            saveBarButton.isEnabled = true
+            delBarButton.isEnabled = false
+            AlertManager.openSingleActionAlert(target: self, title: "Failed", message: "Movie is not saved", action: "OK")
+        }
     }
+    
+    @IBAction func deleteMovie(_ sender: UIBarButtonItem) {
+        let mvmRef = MovieViewModel()
+        let status = mvmRef.delMovieFromDb(withID: (movieDetails?.id)!)
+        if status == true {
+            saveBarButton.isEnabled = true
+            delBarButton.isEnabled = false
+            AlertManager.openSingleActionAlert(target: self, title: "Success", message: "Movie is successfully deleted", action: "OK")
+        } else {
+            saveBarButton.isEnabled = false
+            delBarButton.isEnabled = true
+            AlertManager.openSingleActionAlert(target: self, title: "Failed", message: "Movie is not deleted", action: "OK")
+        }
+    }
+    
     
     
 }

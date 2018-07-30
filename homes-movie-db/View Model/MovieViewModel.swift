@@ -67,7 +67,22 @@ class MovieViewModel {
         }
         
         let movRef = Movie()
-        movRef.makeMovie(posterPath: poster, isAdult: isAdult, overview: ov, releaseDate: rdate, genreIDs: gIDs, id: id, originalTitle: oTitle, originalLang: oLang, title: t, backdropPath: bPath, popularity: pop, voteCount: vCount, isVideo: vid, voteAverage: vAvg)
+        movRef.makeMovie(posterPath: poster, isAdult: isAdult, overview: ov, releaseDate: rdate, id: id, originalTitle: oTitle, originalLang: oLang, title: t, backdropPath: bPath, popularity: pop, voteCount: vCount, isVideo: vid, voteAverage: vAvg)
         return movRef.saveObject()
+    }
+    
+    func delMovieFromDb(withID id: Int) -> Bool{
+        let movRef = Movie()
+        return movRef.delMovie(withID: id)
+    }
+    
+    func checkMovieExistsInDb(id: Int) -> Bool {
+        let movRef = Movie()
+        if let movie = movRef.getMovie(withID: id) {
+            if (movie.id == id) {
+                return true
+            }
+        }
+        return false
     }
 }
