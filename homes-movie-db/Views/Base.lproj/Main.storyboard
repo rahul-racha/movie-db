@@ -16,7 +16,7 @@
         <!--Upcoming Movies-->
         <scene sceneID="Vib-2Q-sTF">
             <objects>
-                <viewController id="zxw-RH-E5C" customClass="UICollectionViewController" sceneMemberID="viewController">
+                <viewController id="zxw-RH-E5C" customClass="UpcomingMoviesViewController" customModule="homes_movie_db" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="rY5-n2-eS6">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -35,14 +35,14 @@
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
-                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="upcomingMovieCell" id="NSX-Y6-jW0">
+                                    <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="upcomingMovieCell" id="NSX-Y6-jW0" customClass="UpcomingMovieCollectionViewCell" customModule="homes_movie_db" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="0.0" width="157" height="162"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO">
                                             <rect key="frame" x="0.0" y="0.0" width="157" height="162"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <imageView userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="EqJ-0e-pEJ">
+                                                <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="EqJ-0e-pEJ">
                                                     <rect key="frame" x="0.0" y="0.0" width="157" height="162"/>
                                                 </imageView>
                                             </subviews>
@@ -54,8 +54,15 @@
                                             <constraint firstAttribute="trailing" secondItem="EqJ-0e-pEJ" secondAttribute="trailing" id="8DW-eN-p5j"/>
                                             <constraint firstItem="EqJ-0e-pEJ" firstAttribute="top" secondItem="NSX-Y6-jW0" secondAttribute="top" id="jUL-Y6-6FU"/>
                                         </constraints>
+                                        <connections>
+                                            <outlet property="upcomingPosterView" destination="EqJ-0e-pEJ" id="S6h-Yk-yep"/>
+                                        </connections>
                                     </collectionViewCell>
                                 </cells>
+                                <connections>
+                                    <outlet property="dataSource" destination="zxw-RH-E5C" id="aBZ-4o-Pg3"/>
+                                    <outlet property="delegate" destination="zxw-RH-E5C" id="R7E-lH-5bv"/>
+                                </connections>
                             </collectionView>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -71,6 +78,10 @@
                         <viewLayoutGuide key="safeArea" id="2Lm-T0-qsa"/>
                     </view>
                     <tabBarItem key="tabBarItem" title="Upcoming Movies" id="UZ4-VQ-mqO"/>
+                    <connections>
+                        <outlet property="searchBar" destination="Q68-i8-TaU" id="139-GJ-Ya7"/>
+                        <outlet property="upcomingMovieColView" destination="yKg-sy-Cyf" id="HGv-nx-uoT"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Q1A-Hx-ShZ" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
@@ -259,11 +270,13 @@
                                 </connections>
                             </tableView>
                             <label opaque="NO" clipsSubviews="YES" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Find your movies!" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="Hqw-zd-jyQ" customClass="UILabelX" customModule="homes_movie_db" customModuleProvider="target">
-                                <rect key="frame" x="65" y="315.5" width="245.5" height="36"/>
+                                <rect key="frame" x="64" y="314.5" width="247.5" height="38"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <fontDescription key="fontDescription" type="boldSystem" pointSize="30"/>
                                 <color key="textColor" red="0.99999600649999998" green="0.84313725490000002" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
+                                <color key="shadowColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <size key="shadowOffset" width="2" height="2"/>
                                 <userDefinedRuntimeAttributes>
                                     <userDefinedRuntimeAttribute type="number" keyPath="shadowRadius">
                                         <real key="value" value="5"/>

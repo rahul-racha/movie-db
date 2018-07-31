@@ -18,7 +18,7 @@ class TopMoviesViewController: UIViewController {
     fileprivate let sectionInsets = UIEdgeInsets(top: 50.0, left: 20.0, bottom: 50.0, right: 20.0)
     fileprivate let itemsPerRow: CGFloat = 2
     fileprivate var topMovieContainer = [MovieMDB]()
-    fileprivate var oc = [MovieMDB]()
+    fileprivate var filteredContainer = [MovieMDB]()
     var movdb = MovieDbService()
     var activityIndicator: UIActivityIndicatorView?
     var searchController: UISearchController!
@@ -26,12 +26,12 @@ class TopMoviesViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setActivityIndicator()
-        topMovieColView.delegate = self
-        topMovieColView.dataSource = self
-        searchBar.delegate = self
-        searchBar.placeholder = "Seach for top movies"
+        self.topMovieColView.delegate = self
+        self.topMovieColView.dataSource = self
+        self.searchBar.delegate = self
+        self.searchBar.placeholder = "Filter top movies"
         NotificationCenter.default.addObserver(self, selector: #selector(self.receiveTopMoviesInfo(_:)), name: .topKey, object: nil)
-        movdb.getTopMovies()
+        self.movdb.getTopMovies()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -47,9 +47,8 @@ class TopMoviesViewController: UIViewController {
     
     @objc func receiveTopMoviesInfo(_ notification: NSNotification) {
         topMovieContainer = notification.userInfo!["top"] as! [MovieMDB]
-        oc = topMovieContainer
+        filteredContainer = topMovieContainer
         topMovieColView.reloadData()
-        activityIndicator?.removeFromSuperview()
     }
 
 }
@@ -62,13 +61,13 @@ UICollectionViewDelegate {
     }
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return topMovieContainer.count
+        return filteredContainer.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier,for: indexPath) as! TopMovieCollectionViewCell
         DispatchQueue.global(qos: .userInteractive).async {
-            if let path = self.topMovieContainer[indexPath.row].poster_path {
+            if let path = self.filteredContainer[indexPath.row].poster_path {
                 DispatchQueue.main.async {
                     cell.topMovPosterView.image = self.movdb.getPosterImage(fromPath: path, size: MovieDbService.PosterSize.w185)
                 }
@@ -76,6 +75,9 @@ UICollectionViewDelegate {
                 DispatchQueue.main.async {
                     cell.topMovPosterView.image = UIImage(named: "cinema-64154.jpg")
                 }
+            }
+            DispatchQueue.main.async {
+                self.activityIndicator?.removeFromSuperview()
             }
         }
         return cell
@@ -86,7 +88,7 @@ UICollectionViewDelegate {
         DispatchQueue.global(qos: .userInteractive).async {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
-            detailVC.movieDetails = self.topMovieContainer[indexPath.row]
+            detailVC.movieDetails = self.filteredContainer[indexPath.row]
             DispatchQueue.main.async {
                 let _ = self.topMovieColView.cellForItem(at: indexPath) as! TopMovieCollectionViewCell
                 self.activityIndicator?.removeFromSuperview()
@@ -117,7 +119,7 @@ extension TopMoviesViewController: UICollectionViewDelegateFlowLayout {
 
 extension TopMoviesViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        topMovieContainer = searchText.isEmpty ? oc : oc.filter { (item: MovieMDB) -> Bool in
+        filteredContainer = searchText.isEmpty ? topMovieContainer : topMovieContainer.filter { (item: MovieMDB) -> Bool in
             return item.original_title?.range(of: searchText, options: .caseInsensitive, range: nil, locale: nil) != nil
         }
         setActivityIndicator()
