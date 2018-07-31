@@ -11,21 +11,26 @@ import TMDBSwift
 
 class TopMoviesViewController: UIViewController {
 
-    
     @IBOutlet weak var topMovieColView: UICollectionView!
+    @IBOutlet weak var searchBar: UISearchBar!
+    
     fileprivate let reuseIdentifier = "topMovieCell"
     fileprivate let sectionInsets = UIEdgeInsets(top: 50.0, left: 20.0, bottom: 50.0, right: 20.0)
     fileprivate let itemsPerRow: CGFloat = 2
     fileprivate var topMovieContainer = [MovieMDB]()
+    fileprivate var oc = [MovieMDB]()
     var movdb = MovieDbService()
     var activityIndicator: UIActivityIndicatorView?
-    
+    var searchController: UISearchController!
+
     override func viewDidLoad() {
         super.viewDidLoad()
+        setActivityIndicator()
         topMovieColView.delegate = self
         topMovieColView.dataSource = self
+        searchBar.delegate = self
+        searchBar.placeholder = "Seach for top movies"
         NotificationCenter.default.addObserver(self, selector: #selector(self.receiveTopMoviesInfo(_:)), name: .topKey, object: nil)
-        setActivityIndicator()
         movdb.getTopMovies()
     }
     
@@ -42,25 +47,16 @@ class TopMoviesViewController: UIViewController {
     
     @objc func receiveTopMoviesInfo(_ notification: NSNotification) {
         topMovieContainer = notification.userInfo!["top"] as! [MovieMDB]
+        oc = topMovieContainer
         topMovieColView.reloadData()
         activityIndicator?.removeFromSuperview()
     }
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destinationViewController.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
 
 extension TopMoviesViewController: UICollectionViewDataSource,
 UICollectionViewDelegate {
+    
     func numberOfSections(in collectionView: UICollectionView) -> Int {
         return 1
     }
@@ -117,6 +113,27 @@ extension TopMoviesViewController: UICollectionViewDelegateFlowLayout {
         return sectionInsets.left
     }
 
+}
+
+extension TopMoviesViewController: UISearchBarDelegate {
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        topMovieContainer = searchText.isEmpty ? oc : oc.filter { (item: MovieMDB) -> Bool in
+            return item.original_title?.range(of: searchText, options: .caseInsensitive, range: nil, locale: nil) != nil
+        }
+        setActivityIndicator()
+        topMovieColView.reloadData()
+        activityIndicator?.removeFromSuperview()
+    }
+    
+    func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
+        self.searchBar.showsCancelButton = true
+    }
+    
+    func searchBarCancelButtonClicked(_ searchBar: UISearchBar) {
+        searchBar.showsCancelButton = false
+        searchBar.text = nil
+        searchBar.resignFirstResponder()
+    }
 }
 
 extension Notification.Name {

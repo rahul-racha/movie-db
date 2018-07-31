@@ -14,6 +14,7 @@ class MovieDbService {
     static let basePosterPath: String = "https://image.tmdb.org/t/p/"
     let searchKey = "com.homes.search"
     let topKey = "com.homes.top"
+    let upcomingKey = "com.homes.upcoming"
     
     enum PosterSize: String {
         case w92 = "w92"
@@ -51,6 +52,20 @@ class MovieDbService {
                 print(movie[0].overview)
                 let notificationObj = ["top": movie]
                 NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.topKey), object: nil, userInfo: notificationObj)
+            }
+        }
+    }
+    
+    func getUpcomingMovies() {
+        MovieMDB.upcoming(page: 1, language: "en"){
+            data, upcomingMovies in
+            if let movie = upcomingMovies{
+                print(movie[0].title)
+                print(movie[0].original_title)
+                print(movie[0].release_date)
+                print(movie[0].overview)
+                let notificationObj = ["upcoming": movie]
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.upcomingKey), object: nil, userInfo: notificationObj)
             }
         }
     }
