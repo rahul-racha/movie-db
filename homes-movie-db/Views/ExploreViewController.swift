@@ -26,6 +26,7 @@ class ExploreViewController: UIViewController {
     var delegate: MovieDetailsDelegate?
     var activityIndicator: UIActivityIndicatorView?
     var isSearchTapped: Bool = false
+    var isCellTapped: Bool = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -47,16 +48,17 @@ class ExploreViewController: UIViewController {
     }
     
     func customizeSearchTextField() {
-        searchTextField.theme = SearchTextFieldTheme.darkTheme()
+        searchTextField.theme = SearchTextFieldTheme.lightTheme()
         searchTextField.theme.font = UIFont.systemFont(ofSize: 12)
         //searchTextField.theme.borderColor = UIColor(red: 0.9, green: 0.9, blue: 0.9, alpha: 1)
-        searchTextField.theme.separatorColor = UIColor (red: 0.9, green: 0.9, blue: 0.9, alpha: 0.5)
-        searchTextField.theme.bgColor = UIColor (red: 0, green: 0, blue: 0, alpha: 1)
+        searchTextField.theme.separatorColor = UIColor (red: 0, green: 0, blue: 0, alpha: 0.5)
+        searchTextField.theme.bgColor = UIColor (red: 1, green: 1, blue: 1, alpha: 1)
         searchTextField.comparisonOptions = [.caseInsensitive]
         searchTextField.maxNumberOfResults = 5
         
         searchTextField.userStoppedTypingHandler = {
             self.isSearchTapped = false
+            self.isCellTapped = false
             if let criteria = self.searchTextField.text {
                 if criteria.count > 1 {
                    self.searchTextField.showLoadingIndicator()
@@ -81,11 +83,11 @@ class ExploreViewController: UIViewController {
                     //self.setDetailVCContent(index: itemPosition)
                 detailVC.modalPresentationStyle = .overCurrentContext
                 DispatchQueue.main.async {
-                    self.activityIndicator?.removeFromSuperview()
                     self.searchTextField.text = item.title
-                    self.searchTextField.filterItems([])
                     self.searchTextField.hideResultsList()
                     self.exploredMoviesView.isHidden = false
+                    sleep(20)
+                    self.activityIndicator?.removeFromSuperview()
                     self.present(detailVC, animated: true, completion: nil)
                 }
             }
@@ -116,7 +118,7 @@ class ExploreViewController: UIViewController {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.view.endEditing(true)
-        self.searchTextField.filterItems([])
+        //self.searchTextField.filterItems([])
         self.searchTextField.hideResultsList()
     }
     
@@ -126,7 +128,7 @@ class ExploreViewController: UIViewController {
             return
         }
         setActivityIndicator()
-        self.searchTextField.filterItems([])
+        //self.searchTextField.filterItems([])
         self.searchTextField.hideResultsList()
         self.searchTextField.stopLoadingIndicator()
         isSearchTapped = true
@@ -159,19 +161,22 @@ class ExploreViewController: UIViewController {
             self.searchTextField.stopLoadingIndicator()
             return
         }
-        if (false == isSearchTapped) {
+        if (false == isSearchTapped && false == isCellTapped) {
             prepareSearchSuggestions(using: results)
         } else {
-            prepareTableViewItems(using: results)
+            if (true == isSearchTapped) {
+                prepareTableViewItems(using: results)
+            }
         }
     }
     
     func prepareTableViewItems(using results: [MovieMDB]) {
         
         self.exploredMoviesView.reloadData()
-        //isSearchTapped = false
         exploredMoviesView.isHidden = false
         descLabel.isHidden = true
+        searchTextField.filterItems([])
+        searchTextField.hideResultsList()
         activityIndicator?.removeFromSuperview()
     }
     
@@ -184,9 +189,7 @@ class ExploreViewController: UIViewController {
                 if (movie.poster_path == nil) {
                     posterImg = UIImage(named: "cinema-64154.jpg")
                 } else {
-                    
-                    let service = MovieDbService()
-                    posterImg = service.getPosterImage(fromPath: movie.poster_path, size: MovieDbService.PosterSize.w92)
+                    posterImg = self.movdb?.getPosterImage(fromPath: movie.poster_path, size: MovieDbService.PosterSize.w92)
                 }
                 var title = ""
                 var releaseDate = ""
@@ -205,8 +208,10 @@ class ExploreViewController: UIViewController {
                 }
             }
             DispatchQueue.main.async {
-                self.searchTextField.filterItems(items)
-                self.searchTextField.stopLoadingIndicator()
+                if (false == self.isSearchTapped && false == self.isCellTapped) {
+                    self.searchTextField.filterItems(items)
+                    self.searchTextField.stopLoadingIndicator()
+                }
             }
         }
     }
@@ -282,6 +287,8 @@ extension ExploreViewController: UITableViewDataSource {
 extension ExploreViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         self.setActivityIndicator()
+        self.isCellTapped = true
+        self.searchTextField.stopLoadingIndicator()
         DispatchQueue.global(qos: .userInteractive).async {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController

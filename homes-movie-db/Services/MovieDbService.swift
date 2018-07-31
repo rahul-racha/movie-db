@@ -13,6 +13,7 @@ class MovieDbService {
     private static let apiKey: String = "f0a72670d4db6d7186c51e06dcb33abc"
     static let basePosterPath: String = "https://image.tmdb.org/t/p/"
     let searchKey = "com.homes.search"
+    let topKey = "com.homes.top"
     
     enum PosterSize: String {
         case w92 = "w92"
@@ -38,6 +39,20 @@ class MovieDbService {
             NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.searchKey), object: nil, userInfo: notificationObj)
         }
         completion(nil)
+    }
+    
+    func getTopMovies() {
+        MovieMDB.toprated(language: "en", page: 1){
+            data, topRatedMovies in
+            if let movie = topRatedMovies{
+                print(movie[0].title)
+                print(movie[0].original_title)
+                print(movie[0].release_date)
+                print(movie[0].overview)
+                let notificationObj = ["top": movie]
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.topKey), object: nil, userInfo: notificationObj)
+            }
+        }
     }
     
     func getPosterImage(fromPath path: String?, size: PosterSize) -> UIImage? {

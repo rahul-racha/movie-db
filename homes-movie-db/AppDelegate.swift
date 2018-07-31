@@ -18,6 +18,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         UIApplication.shared.keyWindow?.rootViewController = storyboard.instantiateViewController(withIdentifier: "TabBarStoryBoard") as! UITabBarController
+        let myTabBar = self.window?.rootViewController as! UITabBarController
+        myTabBar.selectedIndex = 2
         return true
     }
 
