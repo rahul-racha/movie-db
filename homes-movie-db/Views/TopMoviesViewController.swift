@@ -8,6 +8,7 @@
 
 import UIKit
 import TMDBSwift
+import Disk
 
 class TopMoviesViewController: UIViewController {
 
@@ -49,8 +50,42 @@ class TopMoviesViewController: UIViewController {
         topMovieContainer = notification.userInfo!["top"] as! [MovieMDB]
         filteredContainer = topMovieContainer
         topMovieColView.reloadData()
+        DispatchQueue.global(qos: .utility).async {
+            self.saveTopMovies()
+        }
     }
-
+    
+    func saveTopMovies() {
+        let fmvmRef = FeatureMovieViewModel()
+        for topMovie in topMovieContainer {
+            let diskPath = saveImageToDisk(posterPath: topMovie.poster_path, id: topMovie.id)
+            let _ = fmvmRef.saveMovieToDb(posterPath: topMovie.poster_path, localPath: diskPath, isAdult: (topMovie.adult)!, overview: topMovie.overview, releaseDate: topMovie.release_date, genreIDs: topMovie.genre_ids, id: (topMovie.id)!, originalTitle: topMovie.original_title, originalLang: topMovie.original_language, title: topMovie.title, backdropPath: topMovie.backdrop_path, popularity: topMovie.popularity, voteCount: topMovie.vote_count, isVideo: topMovie.video, voteAverage: topMovie.vote_average)
+        }
+    }
+    
+    func saveImageToDisk(posterPath: String?, id: Int) -> String? {
+        guard let path = posterPath else {
+            return nil
+        }
+        if let image = self.movdb.getPosterImage(fromPath: path, size: MovieDbService.PosterSize.original) {
+            do {
+                let destPath = "Top_Movies/"+String(id)+".jpg"
+                try Disk.save(image, to: .documents, as: destPath)
+                return destPath
+            } catch {
+                print("top movie image not saved")
+            }
+        }
+        return nil
+    }
+    
+    func getImageFromDisk(id: Int, path: String?) -> UIImage {
+        if let image = self.movdb.getPosterImage(fromPath: path, size: MovieDbService.PosterSize.w185) {
+            return image
+        } else {
+            return UIImage(named: "cinema-64154.jpg")!
+        }
+    }
 }
 
 extension TopMoviesViewController: UICollectionViewDataSource,
@@ -67,15 +102,7 @@ UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier,for: indexPath) as! TopMovieCollectionViewCell
         DispatchQueue.global(qos: .userInteractive).async {
-            if let path = self.filteredContainer[indexPath.row].poster_path {
-                DispatchQueue.main.async {
-                    cell.topMovPosterView.image = self.movdb.getPosterImage(fromPath: path, size: MovieDbService.PosterSize.w185)
-                }
-            } else {
-                DispatchQueue.main.async {
-                    cell.topMovPosterView.image = UIImage(named: "cinema-64154.jpg")
-                }
-            }
+            cell.topMovPosterView.image = self.getImageFromDisk(id: self.filteredContainer[indexPath.row].id, path: self.filteredContainer[indexPath.row].poster_path)
             DispatchQueue.main.async {
                 self.activityIndicator?.removeFromSuperview()
             }

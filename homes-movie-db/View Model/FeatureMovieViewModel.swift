@@ -1,20 +1,20 @@
 //
-//  MovieViewModel.swift
+//  FeatureMovieViewModel.swift
 //  homes-movie-db
 //
-//  Created by Rahul Racha on 7/29/18.
+//  Created by Rahul Racha on 7/31/18.
 //  Copyright © 2018 Rahul Racha. All rights reserved.
 //
 
 import Foundation
 
-class MovieViewModel {
-    func saveMovieToDb(posterPath: String?, isAdult: Bool, overview: String?, releaseDate: String?, genreIDs: [Int]?, id: Int, originalTitle: String?, originalLang: String?,
-        title: String?, backdropPath: String?, popularity: Double?,
-        voteCount: Double?, isVideo: Bool?, voteAverage: Double?) -> Bool {
+class FeatureMovieViewModel {
+    func saveMovieToDb(posterPath: String?, localPath: String?, isAdult: Bool, overview: String?, releaseDate: String?, genreIDs: [Int]?, id: Int, originalTitle: String?, originalLang: String?,
+                       title: String?, backdropPath: String?, popularity: Double?,
+                       voteCount: Double?, isVideo: Bool?, voteAverage: Double?) -> Bool {
         
         var poster = "", ov = "", rdate = "", oTitle = ""
-        var oLang = "", t = "", bPath = ""
+        var lPath = "", oLang = "", t = "", bPath = ""
         var vid = false
         var gIDs = [Int]()
         var pop: Double = 0, vCount: Double = 0, vAvg: Double = 0
@@ -22,6 +22,9 @@ class MovieViewModel {
             poster = posterPath!
         }
         
+        if localPath != nil {
+            lPath = localPath!
+        }
         if overview != nil {
             ov = overview!
         }
@@ -66,29 +69,19 @@ class MovieViewModel {
             vAvg = voteAverage!
         }
         
-        let movRef = Movie()
-        movRef.makeMovie(posterPath: poster, isAdult: isAdult, overview: ov, releaseDate: rdate, id: id, originalTitle: oTitle, originalLang: oLang, title: t, backdropPath: bPath, popularity: pop, voteCount: vCount, isVideo: vid, voteAverage: vAvg)
+        let movRef = FeatureMovie()
+        movRef.makeMovie(posterPath: poster, localPath: lPath, isAdult: isAdult, overview: ov, releaseDate: rdate, id: id, originalTitle: oTitle, originalLang: oLang, title: t, backdropPath: bPath, popularity: pop, voteCount: vCount, isVideo: vid, voteAverage: vAvg)
         return movRef.saveObject()
     }
     
-    func getMovies() -> [Movie] {
-        let movRef = Movie()
+    func getMovies() -> [FeatureMovie] {
+        let movRef = FeatureMovie()
         let results = Array(movRef.getMovies())
         return results
     }
     
-    func delMovieFromDb(withID id: Int) -> Bool{
-        let movRef = Movie()
-        return movRef.delMovie(withID: id)
-    }
-    
-    func checkMovieExistsInDb(id: Int) -> Bool {
-        let movRef = Movie()
-        if let movie = movRef.getMovie(withID: id) {
-            if (movie.id == id) {
-                return true
-            }
-        }
-        return false
+    func delMovies() -> Bool {
+        let movRef = FeatureMovie()
+        return movRef.delMovies()
     }
 }

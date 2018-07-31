@@ -292,17 +292,18 @@ extension ExploreViewController: UITableViewDataSource {
 
 extension ExploreViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let _ = tableView.cellForRow(at: indexPath) as! ExploreMovieTableViewCell
         self.setActivityIndicator()
-        activityIndicator?.bringSubview(toFront: tableView)
         self.isCellTapped = true
         self.searchTextField.stopLoadingIndicator()
         DispatchQueue.global(qos: .userInteractive).async {
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
             detailVC.movieDetails = self.filteredMovies![indexPath.row]
+            detailVC.modalPresentationStyle = .overCurrentContext
             DispatchQueue.main.async {
-                let _ = tableView.cellForRow(at: indexPath) as! ExploreMovieTableViewCell
                 self.activityIndicator?.removeFromSuperview()
+                tableView.isHidden = false
                 DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
                     self.present(detailVC, animated: true, completion: nil)
                 })
