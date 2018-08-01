@@ -13,7 +13,7 @@
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--Upcoming Movies-->
+        <!--Upcoming-->
         <scene sceneID="Vib-2Q-sTF">
             <objects>
                 <viewController id="zxw-RH-E5C" customClass="UpcomingMoviesViewController" customModule="homes_movie_db" customModuleProvider="target" sceneMemberID="viewController">
@@ -77,7 +77,7 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="2Lm-T0-qsa"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Upcoming Movies" selectedImage="icons8-event-accepted-tentatively-30" id="UZ4-VQ-mqO"/>
+                    <tabBarItem key="tabBarItem" title="Upcoming" image="icons8-clock-25" id="UZ4-VQ-mqO"/>
                     <connections>
                         <outlet property="searchBar" destination="Q68-i8-TaU" id="139-GJ-Ya7"/>
                         <outlet property="upcomingMovieColView" destination="yKg-sy-Cyf" id="HGv-nx-uoT"/>
@@ -707,7 +707,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="icons8-event-accepted-tentatively-30" width="30" height="30"/>
+        <image name="icons8-clock-25" width="25" height="25"/>
         <image name="icons8-search-filled-1024" width="1024" height="1024"/>
         <image name="search-1882327_1280" width="1280" height="1280"/>
         <image name="video-1668906" width="5900" height="2629"/>
