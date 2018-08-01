@@ -21,18 +21,16 @@ class DetailViewController: UIViewController {
     
     var movieDetails = [String: Any]()
     var activityIndicator: UIActivityIndicatorView?
+    var msgFrame: UIView?
     var imageBasePath: String = "Movies/"
     var isNetworkReachable: Bool = ReachabilityManager.shared.isNetworkAvailable
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setActivityIndicator()
+        self.delBarButton.isEnabled = false
+        self.saveBarButton.isEnabled = false
         self.navigationController?.navigationBar.isTranslucent = false
-        DispatchQueue.global(qos: .userInteractive).async {
-            self.setBarButtonsStatus()
-        }
         initViewContent()
-        activityIndicator?.removeFromSuperview()
     }
     
 
@@ -41,10 +39,14 @@ class DetailViewController: UIViewController {
     }
     
     func setActivityIndicator() {
-        activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
-        self.view.addSubview(activityIndicator!)
-        activityIndicator?.frame = view.bounds
-        activityIndicator?.startAnimating()
+        self.msgFrame = UIView(frame: CGRect(x: self.view.frame.midX - 25, y: self.view.frame.midY - 25 , width: 50, height: 50))
+        self.msgFrame?.layer.cornerRadius = 10
+        self.msgFrame?.backgroundColor = UIColor.purple
+        self.activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.whiteLarge)
+        self.activityIndicator?.frame = (self.msgFrame?.bounds)!
+        self.msgFrame?.addSubview(self.activityIndicator!)
+        self.view.addSubview(self.msgFrame!)
+        self.activityIndicator?.startAnimating()
     }
     
     func setBarButtonsStatus() {
@@ -67,13 +69,10 @@ class DetailViewController: UIViewController {
         self.posterImgView.image = UIImage(named: "70253257-loading-wallpapers.jpeg")
         let movdb = MovieDbService()
         let diskRef = DiskManager()
-        //self.setActivityIndicator()
-        //self.activityIndicator?.bringSubview(toFront: self.posterImgView)
         DispatchQueue.global(qos: .userInteractive).async {
           let tempImg  = diskRef.getImage(movieDBRef: movdb, isNetworkReachable: self.isNetworkReachable, id: self.movieDetails["id"] as! Int, imageBasePath: self.imageBasePath, path: self.movieDetails["poster_path"] as? String, imgSize: MovieDbService.PosterSize.original)
+              self.setBarButtonsStatus()
             DispatchQueue.main.async {
-                //self.posterImgView.willRemoveSubview(self.activityIndicator!)
-                //self.activityIndicator?.removeFromSuperview()
                 self.posterImgView.image = tempImg
             }
         }
@@ -104,14 +103,15 @@ class DetailViewController: UIViewController {
     }
     
     @IBAction func saveMovie(_ sender: UIBarButtonItem) {
-        self.setActivityIndicator()
+//        self.setActivityIndicator()
+//        self.msgFrame?.bringSubview(toFront: self.posterImgView)
         let mvmRef = MovieViewModel()
         let diskRef = DiskManager()
         let movdb = MovieDbService()
         let diskPath = diskRef.saveImageToDisk(movieDBRef: movdb, imageBasePath: self.imageBasePath, posterPath: movieDetails["poster_path"] as? String, id: movieDetails["id"] as! Int)
         movieDetails["local_path"] = diskPath
         let status = mvmRef.saveMovieToDb(dataDict: movieDetails)
-        self.activityIndicator?.removeFromSuperview()
+        //self.msgFrame?.removeFromSuperview()
         if status == true {
             saveBarButton.isEnabled = false
             delBarButton.isEnabled = true
@@ -124,10 +124,10 @@ class DetailViewController: UIViewController {
     }
     
     @IBAction func deleteMovie(_ sender: UIBarButtonItem) {
-        self.setActivityIndicator()
+        //self.setActivityIndicator()
         let mvmRef = MovieViewModel()
         let status = mvmRef.delMovieFromDb(withID: movieDetails["id"] as! Int)
-        self.activityIndicator?.removeFromSuperview()
+        //self.msgFrame?.removeFromSuperview()
         if status == true {
             saveBarButton.isEnabled = true
             delBarButton.isEnabled = false
