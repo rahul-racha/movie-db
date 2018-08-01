@@ -21,8 +21,8 @@ class DetailViewController: UIViewController {
     
     var movieDetails = [String: Any]()
     var activityIndicator: UIActivityIndicatorView?
-    let imageBasePath = "Movies/"
-    var isNetworkReachable: Bool = true
+    var imageBasePath: String = "Movies/"
+    var isNetworkReachable: Bool = ReachabilityManager.shared.isNetworkAvailable
     
     override func viewDidLoad() {
         super.viewDidLoad()

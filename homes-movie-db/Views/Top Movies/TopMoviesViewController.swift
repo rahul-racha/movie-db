@@ -24,6 +24,7 @@ class TopMoviesViewController: UIViewController {
     var movdb = MovieDbService()
     var diskRef = DiskManager()
     var activityIndicator: UIActivityIndicatorView?
+    var msgFrame: UIView?
     var searchController: UISearchController!
     var isNetworkReachable: Bool = ReachabilityManager.shared.isNetworkAvailable
     let imageBasePath = "Top_Movies/"
@@ -38,13 +39,17 @@ class TopMoviesViewController: UIViewController {
             self.saveTabPosition()
         }
         self.addObservers()
-        if (0 != FeatureViewModel.launchPosition) {
+        //if (0 != FeatureViewModel.launchPosition) {
             if (ReachabilityManager.shared.isNetworkAvailable) {
                 self.handleOnlineData()
             } else {
                 self.handleOfflineData()
             }
-        }
+        //}
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        //ReachabilityManager.shared.startMonitoring()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -53,35 +58,49 @@ class TopMoviesViewController: UIViewController {
     
     func addObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(self.receiveTopMoviesInfo(_:)), name: .topKey, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOfflineData), name: .offlineKey, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOnlineData), name: .onlineKey, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOfflineData), name: .offlineKey0, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOnlineData), name: .onlineKey0, object: nil)
     }
     
     func setActivityIndicator() {
-        activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
-        view.addSubview(activityIndicator!)
-        activityIndicator?.frame = view.bounds
-        activityIndicator?.startAnimating()
+//        activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
+//        view.addSubview(activityIndicator!)
+//        activityIndicator?.frame = view.bounds
+//        activityIndicator?.startAnimating()
+        self.msgFrame = UIView(frame: CGRect(x: self.view.frame.midX - 25, y: self.view.frame.midY - 25 , width: 50, height: 50))
+        self.msgFrame?.layer.cornerRadius = 10
+        self.msgFrame?.backgroundColor = UIColor.purple
+        self.activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.whiteLarge)
+//        self.activityIndicator?.frame = CGRect(x: self.msgFrame!.frame.midX - 0, y: self.msgFrame!.frame.midY - 0, width: 30, height: 30)
+        self.activityIndicator?.frame = (self.msgFrame?.bounds)!
+        self.msgFrame?.addSubview(self.activityIndicator!)
+        self.view.addSubview(self.msgFrame!)
+        self.activityIndicator?.startAnimating()
     }
     
     func saveTabPosition() {
         let ref = FeatureViewModel()
-        ref.delPosition()
-        ref.saveFeatureToDb(position: 0)
+        if (ref.delPosition()) {
+            let _ = ref.saveFeatureToDb(position: 0)
+        }
     }
     
     @objc func handleOfflineData() {
         DispatchQueue.main.async {
+            self.setActivityIndicator()
             self.searchBar.placeholder = "Filter in offline mode"
             self.isNetworkReachable = false
-            self.setActivityIndicator()
             self.topMovieContainer = self.getTopMoviesFromDb()
             if (0 == self.topMovieContainer.count) {
                 AlertManager.openSingleActionAlert(target: self, title: "No Data", message: "Movies are not saved. Please check your network and try again", action: "OK")
+                self.msgFrame?.removeFromSuperview()
+                return
             }
+            
             self.filteredContainer = self.topMovieContainer
             self.createImageContainer()
             self.topMovieColView.reloadData()
+            self.msgFrame?.removeFromSuperview()
         }
     }
     
@@ -99,6 +118,7 @@ class TopMoviesViewController: UIViewController {
         filteredContainer = topMovieContainer
         self.createImageContainer()
         topMovieColView.reloadData()
+        self.msgFrame?.removeFromSuperview()
         DispatchQueue.global(qos: .background).async {
             self.saveTopMoviesToDb()
         }
@@ -151,24 +171,20 @@ UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier,for: indexPath) as! TopMovieCollectionViewCell
         cell.topMovPosterView.image = self.filteredImgContainer[indexPath.row]
-        self.activityIndicator?.removeFromSuperview()
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let _ = self.topMovieColView.cellForItem(at: indexPath) as! TopMovieCollectionViewCell
         self.setActivityIndicator()
-        DispatchQueue.global(qos: .userInteractive).async {
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
-            detailVC.movieDetails = self.filteredContainer[indexPath.row]
-            detailVC.isNetworkReachable = self.isNetworkReachable
-            detailVC.modalPresentationStyle = .overCurrentContext
-            DispatchQueue.main.async {
-                self.activityIndicator?.removeFromSuperview()
-                self.present(detailVC, animated: true, completion: nil)
-            }
-        }
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
+        detailVC.movieDetails = self.filteredContainer[indexPath.row]
+        //detailVC.imageBasePath = self.imageBasePath
+        detailVC.isNetworkReachable = self.isNetworkReachable
+        detailVC.modalPresentationStyle = .overCurrentContext
+        self.msgFrame?.removeFromSuperview()
+        self.present(detailVC, animated: true, completion: nil)
     }
 }
 
@@ -206,9 +222,7 @@ extension TopMoviesViewController: UISearchBarDelegate {
         if (searchText.isEmpty) {
             self.filteredImgContainer = self.imageContainer
         }
-        //setActivityIndicator()
         self.topMovieColView.reloadData()
-        //self.activityIndicator?.removeFromSuperview()
     }
     
     func searchBarTextDidBeginEditing(_ searchBar: UISearchBar) {
@@ -224,7 +238,7 @@ extension TopMoviesViewController: UISearchBarDelegate {
 
 extension Notification.Name {
     static let topKey = Notification.Name("com.homes.top")
-    static let offlineKey = Notification.Name("com.homes.offline")
-    static let onlineKey = Notification.Name("com.homes.online")
+    static let offlineKey0 = Notification.Name("com.homes.offline0")
+    static let onlineKey0 = Notification.Name("com.homes.online0")
 }
 

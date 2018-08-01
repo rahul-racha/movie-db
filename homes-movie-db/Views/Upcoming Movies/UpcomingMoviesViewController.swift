@@ -20,10 +20,12 @@ class UpcomingMoviesViewController: UIViewController {
     fileprivate var filteredContainer = [[String: Any]]()
     fileprivate var imageContainer = [UIImage]()
     fileprivate var filteredImgContainer = [UIImage]()
+    fileprivate static var isMoviesSaved: Bool = false
     var mapIDToIndexContainer = [Int: Int]()
     var movdb = MovieDbService()
     var diskRef = DiskManager()
     var activityIndicator: UIActivityIndicatorView?
+    var msgFrame: UIView?
     var searchController: UISearchController!
     var isNetworkReachable: Bool = ReachabilityManager.shared.isNetworkAvailable
     let imageBasePath = "Upcoming_Movies/"
@@ -35,17 +37,21 @@ class UpcomingMoviesViewController: UIViewController {
         upcomingMovieColView.dataSource = self
         searchBar.delegate = self
         searchBar.placeholder = "Filter upcoming movies"
-        DispatchQueue.global(qos: .utility).async {
+        DispatchQueue.global(qos: .background).async {
             self.saveTabPosition()
         }
         self.addObservers()
-        if (1 != FeatureViewModel.launchPosition) {
+        //if (1 != FeatureViewModel.launchPosition) {
             if (ReachabilityManager.shared.isNetworkAvailable) {
                 self.handleOnlineData()
             } else {
                 self.handleOfflineData()
             }
-        }
+        //}
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        //ReachabilityManager.shared.startMonitoring()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -54,21 +60,26 @@ class UpcomingMoviesViewController: UIViewController {
     
     func addObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(self.receiveUpcomingMoviesInfo(_:)), name: .upcomingKey, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOfflineData), name: .offlineKey, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOnlineData), name: .onlineKey, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOfflineData), name: .offlineKey1, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOnlineData), name: .onlineKey1, object: nil)
     }
     
     func setActivityIndicator() {
-        activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
-        view.addSubview(activityIndicator!)
-        activityIndicator?.frame = view.bounds
-        activityIndicator?.startAnimating()
+        self.msgFrame = UIView(frame: CGRect(x: self.view.frame.midX - 25, y: self.view.frame.midY - 25 , width: 50, height: 50))
+        self.msgFrame?.layer.cornerRadius = 10
+        self.msgFrame?.backgroundColor = UIColor.purple
+        self.activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.whiteLarge)
+        self.activityIndicator?.frame = (self.msgFrame?.bounds)!
+        self.msgFrame?.addSubview(self.activityIndicator!)
+        self.view.addSubview(self.msgFrame!)
+        self.activityIndicator?.startAnimating()
     }
     
     func saveTabPosition() {
         let ref = FeatureViewModel()
-        ref.delPosition()
-        ref.saveFeatureToDb(position: 1)
+        if (ref.delPosition()) {
+            let _ = ref.saveFeatureToDb(position: 1)
+        }
     }
     
     @objc func handleOnlineData() {
@@ -82,16 +93,20 @@ class UpcomingMoviesViewController: UIViewController {
     
     @objc func handleOfflineData() {
         DispatchQueue.main.async {
+            self.setActivityIndicator()
             self.searchBar.placeholder = "Filter in offline mode"
             self.isNetworkReachable = false
-            self.setActivityIndicator()
             self.movieContainer = self.getUpcomingMoviesFromDb()
             if (0 == self.movieContainer.count) {
                 AlertManager.openSingleActionAlert(target: self, title: "No Data", message: "Movies are not saved. Please check your network and try again", action: "OK")
+                self.msgFrame?.removeFromSuperview()
+                return
             }
+            
             self.filteredContainer = self.movieContainer
             self.createImageContainer()
             self.upcomingMovieColView.reloadData()
+            self.msgFrame?.removeFromSuperview()
         }
     }
     
@@ -100,7 +115,8 @@ class UpcomingMoviesViewController: UIViewController {
         filteredContainer = movieContainer
         self.createImageContainer()
         upcomingMovieColView.reloadData()
-        DispatchQueue.global(qos: .utility).async {
+        self.msgFrame?.removeFromSuperview()
+        DispatchQueue.global(qos: .background).async {
             self.saveUpcomingMoviesToDb()
         }
     }
@@ -152,23 +168,19 @@ UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier,for: indexPath) as! UpcomingMovieCollectionViewCell
         cell.upcomingPosterView.image = self.filteredImgContainer[indexPath.row]
-        self.activityIndicator?.removeFromSuperview()
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         self.setActivityIndicator()
-        DispatchQueue.global(qos: .userInteractive).async {
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
-            detailVC.movieDetails = self.filteredContainer[indexPath.row]
-            detailVC.modalPresentationStyle = .overCurrentContext
-            DispatchQueue.main.async {
-                let _ = self.upcomingMovieColView.cellForItem(at: indexPath) as! UpcomingMovieCollectionViewCell
-                self.activityIndicator?.removeFromSuperview()
-                self.present(detailVC, animated: true, completion: nil)
-            }
-        }
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
+        detailVC.movieDetails = self.filteredContainer[indexPath.row]
+        //detailVC.imageBasePath = self.imageBasePath
+        detailVC.modalPresentationStyle = .overCurrentContext
+        let _ = self.upcomingMovieColView.cellForItem(at: indexPath) as! UpcomingMovieCollectionViewCell
+        self.msgFrame?.removeFromSuperview()
+        self.present(detailVC, animated: true, completion: nil)
     }
 }
 
@@ -226,4 +238,7 @@ extension UpcomingMoviesViewController: UISearchBarDelegate {
 
 extension Notification.Name {
     static let upcomingKey = Notification.Name("com.homes.upcoming")
+    static let offlineKey1 = Notification.Name("com.homes.offline1")
+    static let onlineKey1 = Notification.Name("com.homes.online1")
 }
+

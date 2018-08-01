@@ -51,19 +51,22 @@ class Movie: Object {
     }
     
     func saveObject() -> Bool {
-        let realm = try! Realm()
-        let temp = realm.objects(Movie.self)
-        let currentCount = temp.endIndex
-        try! realm.write {
-            realm.add(self)
+        if (getMovie(withID: self.id) == nil) {
+            let realm = try! Realm()
+            let temp = realm.objects(Movie.self)
+            let currentCount = temp.endIndex
+            try! realm.write {
+                realm.add(self)
+            }
+            var result = false
+            let movie = realm.objects(Movie.self)
+            print(movie)
+            if (movie.endIndex > currentCount) {
+                result = true
+            }
+            return result
         }
-        var result = false
-        let movie = realm.objects(Movie.self)
-        print(movie)
-        if (movie.endIndex > currentCount) {
-            result = true
-        }
-        return result
+        return false
     }
     
     func getMovies() -> Results<Movie> {

@@ -26,10 +26,11 @@ class ExploreViewController: UIViewController {
     var imageContainer = [UIImage]()
     var delegate: MovieDetailsDelegate?
     var activityIndicator: UIActivityIndicatorView?
+    var msgFrame: UIView?
     var isSearchTapped: Bool = false
     var isCellTapped: Bool = false
     var isResponseDelayed: Bool = false
-    var isNetworkReachable: Bool = true
+    var isNetworkReachable: Bool = ReachabilityManager.shared.isNetworkAvailable
     let imageBasePath = "Movies/"
     
     override func viewDidLoad() {
@@ -49,6 +50,10 @@ class ExploreViewController: UIViewController {
         }
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        //ReachabilityManager.shared.startMonitoring()
+    }
+    
     func addGestures() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(ExploreViewController.searchTapped(gesture:)))
         searchImgView.addGestureRecognizer(tapGesture)
@@ -57,8 +62,8 @@ class ExploreViewController: UIViewController {
     
     func addObservers() {
         NotificationCenter.default.addObserver(self, selector: #selector(self.receiveMoviesInfo(_:)), name: .searchKey, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOfflineData), name: .offlineKey, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOnlineData), name: .onlineKey, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOfflineData), name: .offlineKey2, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOnlineData), name: .onlineKey2, object: nil)
     }
     
     func customizeSearchTextField() {
@@ -98,6 +103,7 @@ class ExploreViewController: UIViewController {
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
                 detailVC.movieDetails = self.filteredMovies[itemPosition]
+                //detailVC.imageBasePath = self.imageBasePath
                 detailVC.modalPresentationStyle = .overCurrentContext
                 DispatchQueue.main.async {
                     self.searchTextField.text = item.title
@@ -114,10 +120,15 @@ class ExploreViewController: UIViewController {
     }
     
     func setActivityIndicator() {
-        activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
-        view.addSubview(activityIndicator!)
-        activityIndicator?.frame = view.bounds
-        activityIndicator?.startAnimating()
+        self.msgFrame = UIView(frame: CGRect(x: self.view.frame.midX - 25, y: self.view.frame.midY - 25 , width: 50, height: 50))
+        self.msgFrame?.layer.cornerRadius = 10
+        self.msgFrame?.backgroundColor = UIColor.purple
+        self.activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: UIActivityIndicatorViewStyle.whiteLarge)
+        self.activityIndicator?.frame = (self.msgFrame?.bounds)!
+        self.msgFrame?.addSubview(self.activityIndicator!)
+        self.view.addSubview(self.msgFrame!)
+        self.activityIndicator?.startAnimating()
+
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -171,7 +182,7 @@ class ExploreViewController: UIViewController {
             if (false == isCellTapped && false == isSearchTapped) {
                 searchTextField.stopLoadingIndicator()
             } else {
-                activityIndicator?.removeFromSuperview()
+                self.msgFrame?.removeFromSuperview()
             }
             AlertManager.openSingleActionAlert(target: self, title: "No result", message: "High delay in response. Try some other term", action: "OK")
         }
@@ -204,7 +215,7 @@ class ExploreViewController: UIViewController {
 //        exploredMoviesView.isHidden = false
 //        descLabel.isHidden = true
         searchTextField.hideResultsList()
-        //activityIndicator?.removeFromSuperview()
+        self.msgFrame?.removeFromSuperview()
     }
     
     func prepareSearchSuggestions(using results: [[String: Any]]) {
@@ -271,7 +282,6 @@ extension ExploreViewController: UITableViewDataSource {
         cell.moviePosterView.image = self.imageContainer[indexPath.row]
         exploredMoviesView.isHidden = false
         descLabel.isHidden = true
-        activityIndicator?.removeFromSuperview()
         return cell
     }
 }
@@ -284,30 +294,24 @@ extension ExploreViewController: UITableViewDelegate {
         backgroundView.backgroundColor = UIColor.white
         cell.selectedBackgroundView = backgroundView
         cell.releaseLabel.textColor = UIColor.black
-//        self.exploredMoviesView.isHidden = true
-//        self.descLabel.isHidden = false
         self.setActivityIndicator()
-        self.activityIndicator?.bringSubview(toFront: backgroundView)
         self.isCellTapped = true
         self.searchTextField.stopLoadingIndicator()
-        //DispatchQueue.global(qos: .userInteractive).async {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
         detailVC.movieDetails = self.filteredMovies[indexPath.row]
+        //detailVC.imageBasePath = self.imageBasePath
         detailVC.modalPresentationStyle = .overCurrentContext
-        //DispatchQueue.main.async {
-        self.activityIndicator?.removeFromSuperview()
-//            self.exploredMoviesView.isHidden = false
-//            self.descLabel.isHidden = true
+        self.msgFrame?.removeFromSuperview()
         backgroundView.backgroundColor = UIColor.black
         cell.selectedBackgroundView = backgroundView
         cell.releaseLabel.textColor = UIColor.white
         self.present(detailVC, animated: true, completion: nil)
-        //}
-        //}
     }
 }
 
 extension Notification.Name {
     static let searchKey = Notification.Name("com.homes.search")
+    static let offlineKey2 = Notification.Name("com.homes.offline2")
+    static let onlineKey2 = Notification.Name("com.homes.online2")
 }

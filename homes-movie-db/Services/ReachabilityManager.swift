@@ -11,8 +11,12 @@ import ReachabilitySwift
 
 class ReachabilityManager: NSObject {
     static let shared = ReachabilityManager()
-    let offlineKey = "com.homes.offline"
-    let onlineKey = "com.homes.online"
+    let offlineKey0 = "com.homes.offline0"
+    let offlineKey1 = "com.homes.offline1"
+    let offlineKey2 = "com.homes.offline2"
+    let onlineKey0 = "com.homes.online0"
+    let onlineKey1 = "com.homes.online1"
+    let onlineKey2 = "com.homes.online2"
     var reachabilityStatus: Reachability.NetworkStatus = .notReachable
     var isNetworkAvailable : Bool = false
 //    {
@@ -29,13 +33,17 @@ class ReachabilityManager: NSObject {
         let reachability = notification.object as! Reachability
         switch reachability.currentReachabilityStatus {
         case .notReachable:
-            debugPrint("Network became unreachable")
             isNetworkAvailable = false
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.offlineKey), object: nil)
+            debugPrint("Network became unreachable")
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.offlineKey0), object: nil)
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.offlineKey0), object: nil)
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.offlineKey2), object: nil)
         case .reachableViaWiFi, .reachableViaWWAN:
             isNetworkAvailable = true
             debugPrint("Network reachable through WiFi or Cellular Data")
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.onlineKey), object: nil)
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.onlineKey0), object: nil)
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.onlineKey1), object: nil)
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.onlineKey2), object: nil)
         }
     }
     
