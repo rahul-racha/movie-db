@@ -27,17 +27,43 @@ class MovieDbService {
         TMDBConfig.apikey = MovieDbService.apiKey
     }
     
+    func convertMdbToDict(moviesMDBList: [MovieMDB]) -> [[String: Any]] {
+        var movieDict = [[String: Any]]()
+        for moviesMDB in moviesMDBList {
+            let movie: [String: Any] = [
+                "poster_path": moviesMDB.poster_path,
+                "adult": moviesMDB.adult,
+                "overview": moviesMDB.overview,
+                "release_date": moviesMDB.release_date,
+                "id": moviesMDB.id,
+                "original_title": moviesMDB.original_title,
+                "original_language": moviesMDB.original_language,
+                "title": moviesMDB.title,
+                "backdrop_path": moviesMDB.backdrop_path,
+                "popularity": moviesMDB.popularity,
+                "vote_count": moviesMDB.vote_count,
+                "video": moviesMDB.video,
+                "vote_average": moviesMDB.vote_average
+            ]
+            movieDict.append(movie)
+        }
+        return movieDict
+    }
+    
     func getMovies(withTitle title: String, _ completion: @escaping ([MovieMDB]?) -> ()) {
         SearchMDB.movie(query: title, language: "en", page: 1, includeAdult: true, year: nil, primaryReleaseYear: nil) {
             data, movies in
-            print(movies?[0].original_title)
-            print(movies?[0].overview)
-            print(movies?[0].poster_path)
-            print(movies?[0].video)
-            print(movies?.count)
-            print(movies?[0].genres)
-            let notificationObj = ["movies": movies]
-            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.searchKey), object: nil, userInfo: notificationObj)
+            if let movie = movies {
+                print(movie[0].original_title)
+                print(movie[0].overview)
+                print(movie[0].poster_path)
+                print(movie[0].video)
+                print(movie.count)
+                print(movie[0].genres)
+                let movieDict = self.convertMdbToDict(moviesMDBList: movie)
+                let notificationObj = ["movies": movieDict]
+                NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.searchKey), object: nil, userInfo: notificationObj)
+            }
         }
         completion(nil)
     }
@@ -50,7 +76,8 @@ class MovieDbService {
                 print(movie[0].original_title)
                 print(movie[0].release_date)
                 print(movie[0].overview)
-                let notificationObj = ["top": movie]
+                let movieDict = self.convertMdbToDict(moviesMDBList: movie)
+                let notificationObj = ["top": movieDict]
                 NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.topKey), object: nil, userInfo: notificationObj)
             }
         }
@@ -64,7 +91,8 @@ class MovieDbService {
                 print(movie[0].original_title)
                 print(movie[0].release_date)
                 print(movie[0].overview)
-                let notificationObj = ["upcoming": movie]
+                let movieDict = self.convertMdbToDict(moviesMDBList: movie)
+                let notificationObj = ["upcoming": movieDict]
                 NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.upcomingKey), object: nil, userInfo: notificationObj)
             }
         }

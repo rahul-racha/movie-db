@@ -1,21 +1,19 @@
 //
-//  MovieViewModel.swift
+//  FeatureMovieViewModel.swift
 //  homes-movie-db
 //
-//  Created by Rahul Racha on 7/29/18.
+//  Created by Rahul Racha on 7/31/18.
 //  Copyright © 2018 Rahul Racha. All rights reserved.
 //
 
 import Foundation
 
-class MovieViewModel {
+class TopMovieViewModel {
     func saveMovieToDb(dataDict: [String: Any]) -> Bool {
-        
         var poster = "", ov = "", rdate = "", oTitle = ""
         var lPath = "", oLang = "", t = "", bPath = ""
         var vid = false
         var pop: Double = 0, vCount: Double = 0, vAvg: Double = 0
-        
         if dataDict["poster_path"] != nil {
             poster = dataDict["poster_path"] as! String
         }
@@ -65,55 +63,44 @@ class MovieViewModel {
         
         let isAdult = dataDict["adult"] as! Bool
         let id = dataDict["id"] as! Int
-        
-        let movRef = Movie()
-        movRef.makeMovie(posterPath: poster, localPath: lPath,  isAdult: isAdult, overview: ov, releaseDate: rdate, id: id, originalTitle: oTitle, originalLang: oLang, title: t, backdropPath: bPath, popularity: pop, voteCount: vCount, isVideo: vid, voteAverage: vAvg)
+        let movRef = TopMovie()
+        movRef.makeMovie(posterPath: poster, localPath: lPath, isAdult: isAdult, overview: ov, releaseDate: rdate, id: id, originalTitle: oTitle, originalLang: oLang, title: t, backdropPath: bPath, popularity: pop, voteCount: vCount, isVideo: vid, voteAverage: vAvg)
         return movRef.saveObject()
     }
     
-    func convertMovieToDict(movie: Movie) -> [String: Any] {
-        let movieDict: [String: Any] = [
-            "poster_path": movie.posterPath,
-            "local_path": movie.localPath,
-            "adult": movie.isAdult,
-            "overview": movie.overview,
-            "release_date": movie.releaseDate,
-            "id": movie.id,
-            "original_title": movie.originalTitle,
-            "original_language": movie.originalLang,
-            "title": movie.title,
-            "backdrop_path": movie.backdropPath,
-            "popularity": movie.popularity,
-            "vote_count": movie.voteCount,
-            "video": movie.isVideo,
-            "vote_average": movie.voteAverage
-        ]
-        return movieDict
-    }
-    
     func getMovies() -> [[String: Any]] {
-        let movRef = Movie()
+        let movRef = TopMovie()
         let results = Array(movRef.getMovies())
         var moviesDict = [[String: Any]]()
         for movie in results {
-            let temp = convertMovieToDict(movie: movie)
+            let temp = convertMovieToDict(featureMovie: movie)
             moviesDict.append(temp)
         }
         return moviesDict
     }
     
-    func delMovieFromDb(withID id: Int) -> Bool{
-        let movRef = Movie()
-        return movRef.delMovie(withID: id)
+    func convertMovieToDict(featureMovie: TopMovie) -> [String: Any] {
+        let movieDict: [String: Any] = [
+            "poster_path": featureMovie.posterPath,
+            "local_path": featureMovie.localPath,
+            "adult": featureMovie.isAdult,
+            "overview": featureMovie.overview,
+            "release_date": featureMovie.releaseDate,
+            "id": featureMovie.id,
+            "original_title": featureMovie.originalTitle,
+            "original_language": featureMovie.originalLang,
+            "title": featureMovie.title,
+            "backdrop_path": featureMovie.backdropPath,
+            "popularity": featureMovie.popularity,
+            "vote_count": featureMovie.voteCount,
+            "video": featureMovie.isVideo,
+            "vote_average": featureMovie.voteAverage
+        ]
+        return movieDict
     }
     
-    func checkMovieExistsInDb(id: Int) -> Bool {
-        let movRef = Movie()
-        if let movie = movRef.getMovie(withID: id) {
-            if (movie.id == id) {
-                return true
-            }
-        }
-        return false
+    func delMovies() -> Bool {
+        let movRef = TopMovie()
+        return movRef.delMovies()
     }
 }

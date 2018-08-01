@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import TMDBSwift
 
 class DetailViewController: UIViewController {
     
@@ -20,17 +19,19 @@ class DetailViewController: UIViewController {
     @IBOutlet weak var delBarButton: UIBarButtonItem!
     
     
-    var movieDetails: MovieMDB?
+    var movieDetails = [String: Any]()
     var activityIndicator: UIActivityIndicatorView?
+    let imageBasePath = "Movies/"
+    var isNetworkReachable: Bool = true
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setActivityIndicator()
         self.navigationController?.navigationBar.isTranslucent = false
-        initViewContent()
         DispatchQueue.global(qos: .userInteractive).async {
             self.setBarButtonsStatus()
         }
+        initViewContent()
         activityIndicator?.removeFromSuperview()
     }
     
@@ -48,7 +49,8 @@ class DetailViewController: UIViewController {
     
     func setBarButtonsStatus() {
         let mvmRef = MovieViewModel()
-        let status = mvmRef.checkMovieExistsInDb(id: (movieDetails?.id)!)
+        let id = movieDetails["id"] as! Int
+        let status = mvmRef.checkMovieExistsInDb(id: id)
         DispatchQueue.main.async {
             if (true == status) {
                 self.saveBarButton.isEnabled = false
@@ -60,47 +62,54 @@ class DetailViewController: UIViewController {
         }
     }
     
+    
     func initViewContent() {
-        
-        let service = MovieDbService()
-        if let posterImg = service.getPosterImage(fromPath: movieDetails?.poster_path, size: MovieDbService.PosterSize.original) {
-            posterImgView.image = posterImg
+        let movdb = MovieDbService()
+        let diskRef = DiskManager()
+        self.setActivityIndicator()
+        self.activityIndicator?.bringSubview(toFront: self.posterImgView)
+        DispatchQueue.global(qos: .userInteractive).async {
+          let tempImg  = diskRef.getImage(movieDBRef: movdb, isNetworkReachable: self.isNetworkReachable, id: self.movieDetails["id"] as! Int, imageBasePath: self.imageBasePath, path: self.movieDetails["poster_path"] as? String, imgSize: MovieDbService.PosterSize.original)
+            DispatchQueue.main.async {
+                self.posterImgView.image = tempImg
+                self.activityIndicator?.removeFromSuperview()
+            }
+        }
+        if let titleTxt = movieDetails["original_title"] as? String {
+            titleLabel.text = titleTxt
         } else {
-            posterImgView.image = UIImage(named: "cinema-64154.jpg")
+            titleLabel.text = "Unknown"
         }
         
-        if let mov = movieDetails {
-            if let titleTxt = mov.original_title {
-                titleLabel.text = titleTxt
-            } else {
-                titleLabel.text = "N/A"
-            }
-            
-            if let overview = mov.overview {
-                overviewTxtView.text = overview
-            } else {
-                overviewTxtView.text = "N/A"
-            }
-            
-            if let popularityTxt = mov.popularity {
-                popularityLabel.text = String(format: "%.3f",popularityTxt)
-            } else {
-                popularityLabel.text = "Unknown"
-            }
-            
-            if let releaseTxt = mov.release_date {
-                releaseDataLabel.text = releaseTxt
-            } else {
-                releaseDataLabel.text = "Unknown"
-            }
-        
+        if let overview = movieDetails["overview"] as? String {
+            overviewTxtView.text = overview
+        } else {
+            overviewTxtView.text = "Unknown"
         }
+        
+        if let popularityTxt = movieDetails["popularity"] as? String {
+            popularityLabel.text = String(format: "%.3f",popularityTxt)
+        } else {
+            popularityLabel.text = "Unknown"
+        }
+        
+        if let releaseTxt = movieDetails["release_date"] as? String {
+            releaseDataLabel.text = releaseTxt
+        } else {
+            releaseDataLabel.text = "Unknown"
+        }
+        
     }
     
     @IBAction func saveMovie(_ sender: UIBarButtonItem) {
-
+        self.setActivityIndicator()
         let mvmRef = MovieViewModel()
-        let status = mvmRef.saveMovieToDb(posterPath: movieDetails?.poster_path, isAdult: (movieDetails?.adult)!, overview: movieDetails?.overview, releaseDate: movieDetails?.release_date, genreIDs: movieDetails?.genre_ids, id: (movieDetails?.id)!, originalTitle: movieDetails?.original_title, originalLang: movieDetails?.original_language, title: movieDetails?.title, backdropPath: movieDetails?.backdrop_path, popularity: movieDetails?.popularity, voteCount: movieDetails?.vote_count, isVideo: movieDetails?.video, voteAverage: movieDetails?.vote_average)
+        let diskRef = DiskManager()
+        let movdb = MovieDbService()
+        let diskPath = diskRef.saveImageToDisk(movieDBRef: movdb, imageBasePath: self.imageBasePath, posterPath: movieDetails["poster_path"] as? String, id: movieDetails["id"] as! Int)
+        movieDetails["local_path"] = diskPath
+        let status = mvmRef.saveMovieToDb(dataDict: movieDetails)
+        self.activityIndicator?.removeFromSuperview()
         if status == true {
             saveBarButton.isEnabled = false
             delBarButton.isEnabled = true
@@ -113,8 +122,10 @@ class DetailViewController: UIViewController {
     }
     
     @IBAction func deleteMovie(_ sender: UIBarButtonItem) {
+        self.setActivityIndicator()
         let mvmRef = MovieViewModel()
-        let status = mvmRef.delMovieFromDb(withID: (movieDetails?.id)!)
+        let status = mvmRef.delMovieFromDb(withID: movieDetails["id"] as! Int)
+        self.activityIndicator?.removeFromSuperview()
         if status == true {
             saveBarButton.isEnabled = true
             delBarButton.isEnabled = false
@@ -128,26 +139,4 @@ class DetailViewController: UIViewController {
     
 }
 
-//extension NSLayoutConstraint
-//{
-//    @IBInspectable var iPhone4_Constant: CGFloat
-//        {
-//        set{
-//            //Only apply value to iphone 4 devices.
-//            if (UIScreen.main.bounds.size.height < 500)
-//            {
-//                self.constant = newValue;
-//            }
-//        }
-//        get
-//        {
-//            return self.constant;
-//        }
-//    }
-//}
-//extension DetailViewController: MovieDetailsDelegate {
-//    func setMovieDetails(from movList: [String:String]) {
-//        movieDetails = movList
-//    }
-//}
 

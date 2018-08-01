@@ -11,10 +11,18 @@ import ReachabilitySwift
 
 class ReachabilityManager: NSObject {
     static let shared = ReachabilityManager()
+    let offlineKey = "com.homes.offline"
+    let onlineKey = "com.homes.online"
     var reachabilityStatus: Reachability.NetworkStatus = .notReachable
-    var isNetworkAvailable : Bool {
-        return reachabilityStatus != .notReachable
-    }
+    var isNetworkAvailable : Bool = false
+//    {
+//        get {
+//            return reachabilityStatus != .notReachable
+//        }
+//        set(newValue) {
+//            print("isNetworkAvailable updated")
+//        }
+//    }
     let reachability = Reachability()!
     
     @objc func reachabilityChanged(notification: Notification) {
@@ -22,10 +30,12 @@ class ReachabilityManager: NSObject {
         switch reachability.currentReachabilityStatus {
         case .notReachable:
             debugPrint("Network became unreachable")
-        case .reachableViaWiFi:
-            debugPrint("Network reachable through WiFi")
-        case .reachableViaWWAN:
-            debugPrint("Network reachable through Cellular Data")
+            isNetworkAvailable = false
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.offlineKey), object: nil)
+        case .reachableViaWiFi, .reachableViaWWAN:
+            isNetworkAvailable = true
+            debugPrint("Network reachable through WiFi or Cellular Data")
+            NotificationCenter.default.post(name: NSNotification.Name(rawValue: self.onlineKey), object: nil)
         }
     }
     

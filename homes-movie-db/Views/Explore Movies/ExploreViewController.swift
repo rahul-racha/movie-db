@@ -8,7 +8,6 @@
 
 import UIKit
 import SearchTextField
-import TMDBSwift
 
 protocol MovieDetailsDelegate {
     func setMovieDetails(from movList: [String:String])
@@ -21,13 +20,17 @@ class ExploreViewController: UIViewController {
     @IBOutlet weak var searchImgView: UIImageViewX!
     @IBOutlet weak var descLabel: UILabelX!
     
-    var movdb: MovieDbService?
-    var filteredMovies: [MovieMDB]?
+    var movdb: MovieDbService = MovieDbService()
+    var diskRef: DiskManager = DiskManager()
+    var filteredMovies = [[String: Any]]()
+    var imageContainer = [UIImage]()
     var delegate: MovieDetailsDelegate?
     var activityIndicator: UIActivityIndicatorView?
     var isSearchTapped: Bool = false
     var isCellTapped: Bool = false
     var isResponseDelayed: Bool = false
+    var isNetworkReachable: Bool = true
+    let imageBasePath = "Movies/"
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -36,17 +39,26 @@ class ExploreViewController: UIViewController {
         exploredMoviesView.isHidden = true
         self.descLabel.isHidden = false
         exploredMoviesView.tableFooterView = UIView()
-        movdb = MovieDbService()
         customizeSearchTextField()
         addGestures()
-        NotificationCenter.default.addObserver(self, selector: #selector(self.receiveMoviesInfo(_:)), name: .searchKey, object: nil)
-        
+        addObservers()
+        if (ReachabilityManager.shared.isNetworkAvailable) {
+            self.handleOnlineData()
+        } else {
+            self.handleOfflineData()
+        }
     }
     
     func addGestures() {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(ExploreViewController.searchTapped(gesture:)))
         searchImgView.addGestureRecognizer(tapGesture)
         searchImgView.isUserInteractionEnabled = true
+    }
+    
+    func addObservers() {
+        NotificationCenter.default.addObserver(self, selector: #selector(self.receiveMoviesInfo(_:)), name: .searchKey, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOfflineData), name: .offlineKey, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.handleOnlineData), name: .onlineKey, object: nil)
     }
     
     func customizeSearchTextField() {
@@ -59,13 +71,17 @@ class ExploreViewController: UIViewController {
         searchTextField.maxNumberOfResults = 5
         
         searchTextField.userStoppedTypingHandler = {
+            if (false == self.isNetworkReachable) {
+                AlertManager.openSingleActionAlert(target: self, title: "No Network", message: "Check your internet connection and try again", action: "OK")
+                return
+            }
             self.isSearchTapped = false
             self.isCellTapped = false
             if let criteria = self.searchTextField.text {
                 if criteria.count > 1 {
                    self.searchTextField.showLoadingIndicator()
                     self.isResponseDelayed = true
-                    self.movdb?.getMovies(withTitle: criteria, {
+                    self.movdb.getMovies(withTitle: criteria, {
                         (results) -> Void in
                         print("get movies call returned")
                        NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(self.handleDelayResponse), object: nil)
@@ -79,11 +95,9 @@ class ExploreViewController: UIViewController {
             self.setActivityIndicator()
             DispatchQueue.global(qos: .userInteractive).async {
                 let item = filteredResults[itemPosition]
-                print("Item at position \(itemPosition): \(item.title)")
-                
                 let storyboard = UIStoryboard(name: "Main", bundle: nil)
                 let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
-                detailVC.movieDetails = self.filteredMovies![itemPosition]
+                detailVC.movieDetails = self.filteredMovies[itemPosition]
                 detailVC.modalPresentationStyle = .overCurrentContext
                 DispatchQueue.main.async {
                     self.searchTextField.text = item.title
@@ -106,55 +120,50 @@ class ExploreViewController: UIViewController {
         activityIndicator?.startAnimating()
     }
     
-//    func setDetailVCContent(index: Int) -> [String:String] {
-//        var movieDict = [String:String]()
-//        movieDict["poster_path"] = filteredMovies![index].poster_path
-//        movieDict["backdrop_path"] = filteredMovies![index].backdrop_path
-//        movieDict["original_title"] = filteredMovies![index].original_title
-//        movieDict["overview"] = filteredMovies![0].overview
-//        movieDict["release_date"] = filteredMovies![0].release_date
-//        if (filteredMovies![0].popularity != nil) {
-//        movieDict["popularity"] = String(format: "%.3f", filteredMovies![0].popularity!)
-//        } else {
-//            movieDict["popularity"] = "unknown"
-//        }
-//        return movieDict
-//    }
-    
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.view.endEditing(true)
         self.searchTextField.hideResultsList()
     }
     
+    @objc func handleOnlineData() {
+        DispatchQueue.main.async {
+            self.isNetworkReachable = true
+            self.searchTextField.placeholder = "Enter movie titles"
+        }
+    }
+    
+    @objc func handleOfflineData() {
+        DispatchQueue.main.async {
+            self.isNetworkReachable = false
+            self.searchTextField.placeholder = "Network is not reachable"
+        }
+    }
+    
     @objc func searchTapped(gesture: UIGestureRecognizer) {
+        if (false == isNetworkReachable) {
+            AlertManager.openSingleActionAlert(target: self, title: "No Network", message: "Check your internet connection and try again", action: "OK")
+            return
+        }
+        
         if (searchTextField.text?.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).isEmpty)! {
             AlertManager.openSingleActionAlert(target: self, title: "Empty", message: "Text field should not be empty", action: "OK")
             return
         }
+        self.exploredMoviesView.isHidden = true
+        self.descLabel.isHidden = false
         setActivityIndicator()
         self.searchTextField.hideResultsList()
         self.searchTextField.stopLoadingIndicator()
         isSearchTapped = true
         self.isResponseDelayed = true
         if (gesture.view as? UIImageView) != nil {
-            self.movdb?.getMovies(withTitle: searchTextField.text!, {
+            self.movdb.getMovies(withTitle: searchTextField.text!, {
                 (results) -> Void in
                 print("get movies call returned")
                 NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(self.handleDelayResponse), object: nil)
                 self.perform(#selector(self.handleDelayResponse), with: nil, afterDelay: 10.0)
             })
         }
-    }
-    
-    func setPosterImage(fromPath path: String) -> UIImage? {
-        var poster: UIImage?
-        let url = URL(string:path)
-        if let data = try? Data(contentsOf: url!)
-        {
-            let image: UIImage = UIImage(data: data)!
-            poster = image
-        }
-        return poster
     }
     
     @objc func handleDelayResponse() {
@@ -169,67 +178,60 @@ class ExploreViewController: UIViewController {
     }
     
     @objc func receiveMoviesInfo(_ notification: NSNotification) {
-//        if (true == isResponseDelayed) {
-//            isResponseDelayed = false
-//            return
-//        } else {
-            //NSObject.cancelPreviousPerformRequests(withTarget: self, selector: #selector(handleDelayResponse), object: nil)
-//        }
-        
-        let movieDict = notification.userInfo!["movies"] as? [MovieMDB]?
-        if (movieDict == nil) {
-            return
-        }
+        self.filteredMovies = notification.userInfo!["movies"] as! [[String: Any]]
         self.isResponseDelayed = false
-        self.filteredMovies = movieDict!
-        guard let results = movieDict! else {
-            self.searchTextField.stopLoadingIndicator()
-            return
-        }
+        self.searchTextField.stopLoadingIndicator()
+//        guard let results = movieDict! else {
+//            self.searchTextField.stopLoadingIndicator()
+//            return
+//        }
         if (false == isSearchTapped && false == isCellTapped) {
-            prepareSearchSuggestions(using: results)
+            prepareSearchSuggestions(using: self.filteredMovies)
         } else {
             if (true == isSearchTapped) {
-                prepareTableViewItems(using: results)
+                prepareTableViewItems()
             }
         }
     }
     
-    func prepareTableViewItems(using results: [MovieMDB]) {
-        
+    func createImageContainer() {
+        self.imageContainer.removeAll()
+        for result in self.filteredMovies {
+            let tempImg = self.diskRef.getImage(movieDBRef: self.movdb, isNetworkReachable: self.isNetworkReachable, id: result["id"] as! Int, imageBasePath: self.imageBasePath, path: result["poster_path"] as? String, imgSize: MovieDbService.PosterSize.w92)
+            self.imageContainer.append(tempImg)
+        }
+    }
+    
+    func prepareTableViewItems() {
+        self.createImageContainer()
         self.exploredMoviesView.reloadData()
-        exploredMoviesView.isHidden = false
-        descLabel.isHidden = true
+//        exploredMoviesView.isHidden = false
+//        descLabel.isHidden = true
         searchTextField.hideResultsList()
         //activityIndicator?.removeFromSuperview()
     }
     
-    func prepareSearchSuggestions(using results: [MovieMDB]) {
+    func prepareSearchSuggestions(using results: [[String: Any]]) {
         var items = [SearchTextFieldItem]()
         DispatchQueue.global(qos: .userInteractive).async {
             var counter: Int = 1
             for movie in results {
-                var posterImg: UIImage?
-                if (movie.poster_path == nil) {
-                    posterImg = UIImage(named: "cinema-64154.jpg")
-                } else {
-                    posterImg = self.movdb?.getPosterImage(fromPath: movie.poster_path, size: MovieDbService.PosterSize.w92)
-                }
-                var title = ""
-                var releaseDate = ""
-                if (movie.original_title != nil) {
-                    title = movie.original_title!
-                }
+                let posterImg = self.diskRef.getImage(movieDBRef: self.movdb, isNetworkReachable: self.isNetworkReachable, id: movie["id"] as! Int, imageBasePath: self.imageBasePath, path: movie["poster_path"] as? String, imgSize: MovieDbService.PosterSize.w92)
+                    var title = ""
+                    var releaseDate = ""
+                    if (movie["original_title"] != nil) {
+                        title = movie["original_title"] as! String
+                    }
                 
-                if (movie.release_date != nil) {
-                    releaseDate = movie.release_date!
-                }
-                let item = SearchTextFieldItem(title: title, subtitle: releaseDate, image: posterImg)
-                items.append(item)
-                counter += 1
-                if (counter > 5) {
-                    break
-                }
+                    if (movie["release_date"] != nil) {
+                        releaseDate = movie["release_date"] as! String
+                    }
+                    let item = SearchTextFieldItem(title: title, subtitle: releaseDate, image: posterImg)
+                    items.append(item)
+                    counter += 1
+                    if (counter > 5) {
+                        break
+                    }
             }
             DispatchQueue.main.async {
                 if (false == self.isSearchTapped && false == self.isCellTapped) {
@@ -254,37 +256,25 @@ extension ExploreViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if let results = filteredMovies {
-            return results.count
-        }
-        return 0
+        return filteredMovies.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "exploredMovieCell", for: indexPath) as! ExploreMovieTableViewCell
-        if let title = self.filteredMovies![indexPath.row].original_title {
+        if let title = self.filteredMovies[indexPath.row]["original_title"] as? String {
             cell.titleLabel.text = title
         } else {
             cell.titleLabel.text = "Unknown"
         }
         
-        if let date = self.filteredMovies![indexPath.row].release_date {
+        if let date = self.filteredMovies[indexPath.row]["release_date"] as? String {
             cell.releaseLabel.text = date
         } else {
             cell.releaseLabel.text = "Unknown"
         }
-        DispatchQueue.global(qos: .userInteractive).async {
-            let service = MovieDbService()
-            if let posterImg = service.getPosterImage(fromPath: self.filteredMovies![indexPath.row].poster_path, size: MovieDbService.PosterSize.w92) {
-                DispatchQueue.main.async {
-                    cell.moviePosterView.image = posterImg
-                }
-            } else {
-                DispatchQueue.main.async {
-                    cell.moviePosterView.image = UIImage(named: "cinema-64154.jpg")
-                }
-            }
-        }
+        cell.moviePosterView.image = self.imageContainer[indexPath.row]
+        exploredMoviesView.isHidden = false
+        descLabel.isHidden = true
         activityIndicator?.removeFromSuperview()
         return cell
     }
@@ -292,23 +282,33 @@ extension ExploreViewController: UITableViewDataSource {
 
 extension ExploreViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let _ = tableView.cellForRow(at: indexPath) as! ExploreMovieTableViewCell
+        let cell = tableView.cellForRow(at: indexPath) as! ExploreMovieTableViewCell
+        let backgroundView = UIView()
+        
+        backgroundView.backgroundColor = UIColor.white
+        cell.selectedBackgroundView = backgroundView
+        cell.releaseLabel.textColor = UIColor.black
+//        self.exploredMoviesView.isHidden = true
+//        self.descLabel.isHidden = false
         self.setActivityIndicator()
+        self.activityIndicator?.bringSubview(toFront: self.exploredMoviesView)
         self.isCellTapped = true
         self.searchTextField.stopLoadingIndicator()
-        DispatchQueue.global(qos: .userInteractive).async {
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
-            let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
-            detailVC.movieDetails = self.filteredMovies![indexPath.row]
-            detailVC.modalPresentationStyle = .overCurrentContext
-            DispatchQueue.main.async {
-                self.activityIndicator?.removeFromSuperview()
-                tableView.isHidden = false
-                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1), execute: {
-                    self.present(detailVC, animated: true, completion: nil)
-                })
-            }
-        }
+        //DispatchQueue.global(qos: .userInteractive).async {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let detailVC = storyboard.instantiateViewController(withIdentifier: "DetailViewStoryBoard") as! DetailViewController
+        detailVC.movieDetails = self.filteredMovies[indexPath.row]
+        detailVC.modalPresentationStyle = .overCurrentContext
+        //DispatchQueue.main.async {
+        self.activityIndicator?.removeFromSuperview()
+//            self.exploredMoviesView.isHidden = false
+//            self.descLabel.isHidden = true
+        backgroundView.backgroundColor = UIColor.black
+        cell.selectedBackgroundView = backgroundView
+        cell.releaseLabel.textColor = UIColor.white
+        self.present(detailVC, animated: true, completion: nil)
+        //}
+        //}
     }
 }
 

@@ -1,15 +1,15 @@
 //
-//  Movie.swift
+//  FeatureMovie.swift
 //  homes-movie-db
 //
-//  Created by Rahul Racha on 7/29/18.
+//  Created by Rahul Racha on 7/31/18.
 //  Copyright © 2018 Rahul Racha. All rights reserved.
 //
 
 import Foundation
 import RealmSwift
 
-class Movie: Object {
+class TopMovie: Object {
     @objc dynamic var posterPath = ""
     @objc dynamic var localPath = ""
     @objc dynamic var isAdult: Bool = false
@@ -31,9 +31,9 @@ class Movie: Object {
     }
     
     func makeMovie(posterPath: String, localPath: String, isAdult: Bool, overview: String, releaseDate: String, id: Int,
-        originalTitle: String, originalLang: String,
-        title: String, backdropPath: String, popularity: Double,
-        voteCount: Double, isVideo: Bool, voteAverage: Double) {
+                   originalTitle: String, originalLang: String,
+                   title: String, backdropPath: String, popularity: Double,
+                   voteCount: Double, isVideo: Bool, voteAverage: Double) {
         self.posterPath = posterPath
         self.localPath = localPath
         self.isAdult = isAdult
@@ -52,13 +52,13 @@ class Movie: Object {
     
     func saveObject() -> Bool {
         let realm = try! Realm()
-        let temp = realm.objects(Movie.self)
+        let temp = realm.objects(TopMovie.self)
         let currentCount = temp.endIndex
         try! realm.write {
             realm.add(self)
         }
         var result = false
-        let movie = realm.objects(Movie.self)
+        let movie = realm.objects(TopMovie.self)
         print(movie)
         if (movie.endIndex > currentCount) {
             result = true
@@ -66,13 +66,13 @@ class Movie: Object {
         return result
     }
     
-    func getMovies() -> Results<Movie> {
+    func getMovies() -> Results<TopMovie> {
         let realm = try! Realm()
-        let movies = realm.objects(Movie.self)
-        return movies
+        let movies = realm.objects(TopMovie.self)
+        return movies;
     }
     
-    func getMovie(withID id: Int) -> Movie?  {
+    func getMovie(withID id: Int) -> TopMovie?  {
         let list = getMovies()
         let predicate = "id = " + String(id)
         let result = list.filter(predicate)
@@ -81,6 +81,17 @@ class Movie: Object {
             return movie[0]
         }
         return nil
+    }
+    
+    func delMovies() -> Bool {
+        let realm = try! Realm()
+        let movies = realm.objects(TopMovie.self)
+        var counter = false
+        try! realm.write {
+            realm.delete(movies)
+            counter = true
+        }
+        return counter
     }
     
     func delMovie(withID id: Int) -> Bool {
@@ -97,3 +108,4 @@ class Movie: Object {
     }
     
 }
+
