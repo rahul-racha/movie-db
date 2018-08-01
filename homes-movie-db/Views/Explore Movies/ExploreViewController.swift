@@ -180,11 +180,7 @@ class ExploreViewController: UIViewController {
     @objc func receiveMoviesInfo(_ notification: NSNotification) {
         self.filteredMovies = notification.userInfo!["movies"] as! [[String: Any]]
         self.isResponseDelayed = false
-        self.searchTextField.stopLoadingIndicator()
-//        guard let results = movieDict! else {
-//            self.searchTextField.stopLoadingIndicator()
-//            return
-//        }
+
         if (false == isSearchTapped && false == isCellTapped) {
             prepareSearchSuggestions(using: self.filteredMovies)
         } else {
@@ -291,7 +287,7 @@ extension ExploreViewController: UITableViewDelegate {
 //        self.exploredMoviesView.isHidden = true
 //        self.descLabel.isHidden = false
         self.setActivityIndicator()
-        self.activityIndicator?.bringSubview(toFront: self.exploredMoviesView)
+        self.activityIndicator?.bringSubview(toFront: backgroundView)
         self.isCellTapped = true
         self.searchTextField.stopLoadingIndicator()
         //DispatchQueue.global(qos: .userInteractive).async {

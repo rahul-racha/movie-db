@@ -77,7 +77,7 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="2Lm-T0-qsa"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Upcoming Movies" id="UZ4-VQ-mqO"/>
+                    <tabBarItem key="tabBarItem" title="Upcoming Movies" selectedImage="icons8-event-accepted-tentatively-30" id="UZ4-VQ-mqO"/>
                     <connections>
                         <outlet property="searchBar" destination="Q68-i8-TaU" id="139-GJ-Ya7"/>
                         <outlet property="upcomingMovieColView" destination="yKg-sy-Cyf" id="HGv-nx-uoT"/>
@@ -87,7 +87,7 @@
             </objects>
             <point key="canvasLocation" x="-1156" y="67.916041979010501"/>
         </scene>
-        <!--Top Movies-->
+        <!--Top Movies View Controller-->
         <scene sceneID="krb-fh-4e3">
             <objects>
                 <viewController automaticallyAdjustsScrollViewInsets="NO" id="YuH-4I-O03" customClass="TopMoviesViewController" customModule="homes_movie_db" customModuleProvider="target" sceneMemberID="viewController">
@@ -151,7 +151,7 @@
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="riN-1L-rVv"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Top Movies" id="XJ0-ug-eb8"/>
+                    <tabBarItem key="tabBarItem" selectedImage="icons8-search-filled-1024" systemItem="topRated" id="XJ0-ug-eb8"/>
                     <connections>
                         <outlet property="searchBar" destination="kHb-cp-JNj" id="lOI-WE-HNZ"/>
                         <outlet property="searchDisplayController" destination="nWl-OG-u2y" id="z0V-3M-ur0"/>
@@ -189,7 +189,7 @@
             </objects>
             <point key="canvasLocation" x="-1156" y="-900"/>
         </scene>
-        <!--Explore-->
+        <!--Explore View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
                 <viewController automaticallyAdjustsScrollViewInsets="NO" id="BYZ-38-t0r" customClass="ExploreViewController" customModule="homes_movie_db" customModuleProvider="target" sceneMemberID="viewController">
@@ -360,7 +360,7 @@
                             </mask>
                         </variation>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Explore" id="nBB-lp-c84"/>
+                    <tabBarItem key="tabBarItem" systemItem="search" id="nBB-lp-c84"/>
                     <simulatedTabBarMetrics key="simulatedBottomBarMetrics"/>
                     <connections>
                         <outlet property="descLabel" destination="Hqw-zd-jyQ" id="o54-cS-5FB"/>
@@ -707,6 +707,8 @@
         </scene>
     </scenes>
     <resources>
+        <image name="icons8-event-accepted-tentatively-30" width="30" height="30"/>
+        <image name="icons8-search-filled-1024" width="1024" height="1024"/>
         <image name="search-1882327_1280" width="1280" height="1280"/>
         <image name="video-1668906" width="5900" height="2629"/>
     </resources>

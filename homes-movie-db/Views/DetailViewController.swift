@@ -42,7 +42,7 @@ class DetailViewController: UIViewController {
     
     func setActivityIndicator() {
         activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
-        view.addSubview(activityIndicator!)
+        self.view.addSubview(activityIndicator!)
         activityIndicator?.frame = view.bounds
         activityIndicator?.startAnimating()
     }
@@ -64,15 +64,17 @@ class DetailViewController: UIViewController {
     
     
     func initViewContent() {
+        self.posterImgView.image = UIImage(named: "70253257-loading-wallpapers.jpeg")
         let movdb = MovieDbService()
         let diskRef = DiskManager()
-        self.setActivityIndicator()
-        self.activityIndicator?.bringSubview(toFront: self.posterImgView)
+        //self.setActivityIndicator()
+        //self.activityIndicator?.bringSubview(toFront: self.posterImgView)
         DispatchQueue.global(qos: .userInteractive).async {
           let tempImg  = diskRef.getImage(movieDBRef: movdb, isNetworkReachable: self.isNetworkReachable, id: self.movieDetails["id"] as! Int, imageBasePath: self.imageBasePath, path: self.movieDetails["poster_path"] as? String, imgSize: MovieDbService.PosterSize.original)
             DispatchQueue.main.async {
+                //self.posterImgView.willRemoveSubview(self.activityIndicator!)
+                //self.activityIndicator?.removeFromSuperview()
                 self.posterImgView.image = tempImg
-                self.activityIndicator?.removeFromSuperview()
             }
         }
         if let titleTxt = movieDetails["original_title"] as? String {
