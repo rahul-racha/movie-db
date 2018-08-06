@@ -1,0 +1,38 @@
+PODS:
+  - Disk (0.3.3)
+  - ReachabilitySwift (3)
+  - Realm (3.0.2):
+    - Realm/Headers (= 3.0.2)
+  - Realm/Headers (3.0.2)
+  - RealmSwift (3.0.2):
+    - Realm (= 3.0.2)
+  - SearchTextField (1.2.0)
+  - TMDBSwift (0.4.2.1)
+
+DEPENDENCIES:
+  - Disk
+  - ReachabilitySwift
+  - RealmSwift
+  - SearchTextField
+  - TMDBSwift
+
+SPEC REPOS:
+  https://github.com/cocoapods/specs.git:
+    - Disk
+    - ReachabilitySwift
+    - Realm
+    - RealmSwift
+    - SearchTextField
+    - TMDBSwift
+
+SPEC CHECKSUMS:
+  Disk: d1f55cd61f6ca20f368232d0c6e37e3c3dfcb63e
+  ReachabilitySwift: f5b9bb30a0777fac8f09ce8b067e32faeb29bb64
+  Realm: 6f23fd1f178a09342eac21bfa7c2bf4312a7a180
+  RealmSwift: 695393add1b8f9d5fa75dd16e6355cf3935f71e2
+  SearchTextField: a5bb7e4c33affadb115afdbe8100d84ef10a8024
+  TMDBSwift: f91fb1860d3ea7c57f9970d98ebf88868c7e5d9a
+
+PODFILE CHECKSUM: 14fa5333bbb31d9037d8e2e12e2d2750ccb1a662
+
+COCOAPODS: 1.5.3
