@@ -51,7 +51,7 @@ $ pod install
 ```bash
 $ open homes-movie-db.xcworkspace -a Xcode
 ```
-#
+
 ## Requirements
 
 * Xcode 9
