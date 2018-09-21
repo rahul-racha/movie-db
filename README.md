@@ -12,12 +12,22 @@ Movie Database Application is an iOS mobile application that allows user to sear
   |------------------------------------------------------------|------------------------------------------------------------|
   | <img src="./resources/top-movies.png" width="250"/>        | <img src="./resources/upcoming-movies.png" width="250"/>   |
 
+#
 ### Search Movies
 - The view provides results by two ways:
   1) Auto search results are displayed at the text field as the user enters the letters.
   2) When user clicks the search button i.e the magnifying glass, the results are neatly displayed in a table view.
-  
-  
-## Detail View
-The view shows details of the selected movie.
-<img src="./resources/details.png" width="250"/> 
+
+| Search                                        |  Textfield Results                            | Table View Results     |
+|-----------------------------------------------|-----------------------------------------------|------------------------|
+|<img src="./resources/search.png" width="250"/>|<img src="./resources/searchtextfield.png" width="250"/>|<img src="./resources/table-results.png" width="250"/>| 
+ 
+#  
+## Save and Delete
+- The view shows details of the selected movie.
+- The movie can be saved to the database to help user check the movie info without network. The saved movie can also be deleted.
+- Movies are saved and deleted using [Realm](https://realm.io/docs/swift/latest/) database.
+
+  | Save Movies                                                | Delete Movies                                              |
+  |------------------------------------------------------------|------------------------------------------------------------|
+  | <img src="./resources/save.png" width="250"/>              | <img src="./resources/delete.png" width="250"/>            |
