@@ -1,6 +1,6 @@
 # Movie Database Application
 ## Description
-Movie Database Application is an iOS mobile application that allows user to search for movies in [The Movie Database](https://developers.themoviedb.org/3/getting-started/introduction) and displays results in a simple and neat UI. The application uses [TheMovieDatabaseSwiftWrapper](https://github.com/gkye/TheMovieDatabaseSwiftWrapper) to fetch response from the Movie Database API.
+Movie Database Application is an iOS mobile application that allows user to search for movies from [The Movie Database](https://developers.themoviedb.org/3/getting-started/introduction) and displays results in a simple and neat UI. The application uses [TheMovieDatabaseSwiftWrapper](https://github.com/gkye/TheMovieDatabaseSwiftWrapper) to fetch responses from the Movie Database API.
 
 ## Features
 
@@ -25,9 +25,29 @@ Movie Database Application is an iOS mobile application that allows user to sear
 #  
 ## Save and Delete
 - The view shows details of the selected movie.
-- The movie can be saved to the database to help user check the movie info without network. The saved movie can also be deleted.
+- The movie can be saved to the database to help user check the information of the movie without network. The saved movie can also be deleted.
 - Movies are saved and deleted using [Realm](https://realm.io/docs/swift/latest/) database.
 
 Details                                          | Save Movies                                  | Delete Movies              |
 -------------------------------------------------|----------------------------------------------|----------------------------|
 <img src="./resources/detail-2.png" width="250"/>| <img src="./resources/save.png" width="250"/>| <img src="./resources/delete.png" width="250"/>|
+
+## Handle Network Loss
+- Top movies and upcoming movies from the last displayed list are saved in the background.
+- The same list of movies is displayed when there are network connectivity issues.
+
+### How to build
+1. Clone the repository
+```bash
+$ git clone https://github.com/rahul-racha/movie-db.git
+```
+2. Install pods
+```bash
+$ cd movie-db
+$ pod install
+```
+3. Open the workspace in Xcode
+```bash
+$ open movie-db.xcworkspace -a Xcode
+```
+
