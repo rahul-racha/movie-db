@@ -10,8 +10,14 @@ Movie Database Application is an iOS mobile application that allows user to sear
 
   | Top Movies                                                 | Upcoming Movies                                            |
   |------------------------------------------------------------|------------------------------------------------------------|
-  | <img src="./resources/top-movies.png" width="350"/>        | <img src="./resources/upcoming-movies.png" width="350"/>   |
+  | <img src="./resources/top-movies.png" width="250"/>        | <img src="./resources/upcoming-movies.png" width="250"/>   |
 
+### Search Movies
+- The view provides results by two ways:
+  1) Auto search results are displayed at the text field as the user enters the letters.
+  2) When user clicks the search button i.e the magnifying glass, the results are neatly displayed in a table view.
+  
+  
 ## Detail View
-- The view shows details of the selected movie.
-
+The view shows details of the selected movie.
+<img src="./resources/details.png" width="250"/> 
