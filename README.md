@@ -28,6 +28,6 @@ Movie Database Application is an iOS mobile application that allows user to sear
 - The movie can be saved to the database to help user check the movie info without network. The saved movie can also be deleted.
 - Movies are saved and deleted using [Realm](https://realm.io/docs/swift/latest/) database.
 
-  | Save Movies                                                | Delete Movies                                              |
-  |------------------------------------------------------------|------------------------------------------------------------|
-  | <img src="./resources/save.png" width="250"/>              | <img src="./resources/delete.png" width="250"/>            |
+Details                                          | Save Movies                                  | Delete Movies              |
+-------------------------------------------------|----------------------------------------------|----------------------------|
+<img src="./resources/detail-2.png" width="250"/>| <img src="./resources/save.png" width="250"/>| <img src="./resources/delete.png" width="250"/>|
