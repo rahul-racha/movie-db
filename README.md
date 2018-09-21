@@ -23,7 +23,7 @@ Movie Database Application is an iOS mobile application that allows user to sear
 |<img src="./resources/search.png" width="250"/>|<img src="./resources/searchtextfield.png" width="250"/>|<img src="./resources/table-results.png" width="250"/>| 
  
 #  
-## Save and Delete
+### Save and Delete
 - The view shows details of the selected movie.
 - The movie can be saved to the database to help user check the information of the movie without network. The saved movie can also be deleted.
 - Movies are saved and deleted using [Realm](https://realm.io/docs/swift/latest/) database.
@@ -32,11 +32,12 @@ Details                                          | Save Movies            
 -------------------------------------------------|----------------------------------------------|----------------------------|
 <img src="./resources/detail-2.png" width="250"/>| <img src="./resources/save.png" width="250"/>| <img src="./resources/delete.png" width="250"/>|
 
-## Handle Network Loss
+### Handle Network Loss
 - Top movies and upcoming movies from the last displayed list are saved in the background.
 - The same list of movies is displayed when there are network connectivity issues.
 
-### How to build
+#
+## How to build
 1. Clone the repository
 ```bash
 $ git clone https://github.com/rahul-racha/movie-db.git
@@ -48,6 +49,12 @@ $ pod install
 ```
 3. Open the workspace in Xcode
 ```bash
-$ open movie-db.xcworkspace -a Xcode
+$ open homes-movie-db.xcworkspace -a Xcode
 ```
+#
+## Requirements
+
+* Xcode 9
+* iOS 10+
+* Swift 4
 
